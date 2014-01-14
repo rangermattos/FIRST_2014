@@ -31,10 +31,17 @@ void FRC::inputManager::update()
                 m2 = threshold(s2.GetY(), thresh);
                 break;
         case MODE_JOY_ARCADE:
-                //WARNING! REQUIRES INPUT LIMITING, DO NOT COMPILE WITHOUT IMPLIMENTING PROPER LIMITING
-                m1 = threshold(s1.GetY() + s1.GetX(), thresh);
-                m2 = threshold(s1.GetY() - s1.GetX(), thresh);
+                //the max value is 2.0f, and -2.0f, so by dividing by 2.0, limits the input
+                m1 = threshold((s1.GetY() + s1.GetX()) / 2.0f, thresh);
+                m2 = threshold((s1.GetY() - s1.GetX()) / 2.0f, thresh);
+                //if m1 and m2 are within some threshold, change them to be the average of eachother
                 break;
+        }
+        if(-thresh < (m1 - m2) < thresh)
+        {
+                float val = (m1 * m2) / 2.0f;
+                m1 = val;
+                m2 = val;
         }
 }
 float FRC::inputManager::getMotor(int motor)
