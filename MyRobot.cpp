@@ -14,9 +14,9 @@ class RobotDemo : public SimpleRobot
         Talon m1, m2;
 public:
         RobotDemo():
+        		inpMan(0.1f, FRC::inputManager::MODE_XBOX_TANK),
                 m1(1),
-                m2(2),
-                inpMan()
+                m2(2)
         {
                 //myRobot.SetExpiration(0.1);
         }
@@ -40,10 +40,19 @@ public:
                 //myRobot.SetSafetyEnabled(false);
                 while (IsOperatorControl())
                 {
+                	std::cout << "z : " << inpMan.getZ() << "\n";
+        			/*if (inpMan.getZ() > 0.0f)
+        			{
+        				inpMan.setMode(FRC::inputManager::MODE_JOY_ARCADE);
+        			}
+        			else
+        			{
+        				inpMan.setMode(FRC::inputManager::MODE_JOY_TANK);
+        			}*/
                         inpMan.update();
                         std::cout << "motor 1 : " << inpMan.getMotor(1) << ", Motor 2 : " << inpMan.getMotor(2) << "\n";
-                        m1.Set(inpMan.getMotor(1) / 2.0f);
-                        m2.Set(-inpMan.getMotor(2) / 2.0f);
+                        m1.Set(inpMan.getMotor(1));
+                        m2.Set(-inpMan.getMotor(2));
                         Wait(0.005);                                // wait for a motor update time
                 }
         }

@@ -28,13 +28,15 @@ namespace FRC
                         MODE_XBOX_ARCADE
                 };
                 ///@brief constructs the object, default values are most optimal
-                inputManager(float threshold = 0.05f, unsigned char mode = MODE_JOY_TANK);
+                inputManager(float threshold = 0.1f, unsigned char mode = MODE_JOY_TANK);
                 ///@brief locks in new values, and thresholds the value
                 void update();
                 ///@brief allows swapping of modes while running, or during configuration
                 void setMode(unsigned char mode);
                 ///@brief get the motor, either side one or side two
                 float getMotor(int motor);
+        		///@brief get the z-axis data off of the primary joystick
+        		float getZ(void);
         };
 }
 #endif // FRC2014_INPUTMANAGER
