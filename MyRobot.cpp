@@ -18,7 +18,8 @@ class RobotDemo : public SimpleRobot
         DriverStationLCD *LCD;
         DigitalInput Myswitch;
         bool IsArcade, prevArcade;
-        //Compressor compressor;
+        Compressor compressor;
+        Solenoid sol1, sol2;
 public:
         RobotDemo():
         		inpMan(0.1f, FRC::inputManager::MODE_XBOX_TANK),
@@ -28,8 +29,10 @@ public:
                 LCD(DriverStationLCD::GetInstance()),
                 Myswitch(1),
                 IsArcade(0),
-                prevArcade(0)
-                //compressor(2,1)
+                prevArcade(0),
+                compressor(2,1),
+                sol1(1),
+                sol2(2)
         {
                 //myRobot.SetExpiration(0.1);
         }
@@ -83,11 +86,10 @@ public:
          */
         void OperatorControl()
         {
+        	compressor.Start();
                 //myRobot.SetSafetyEnabled(false);
                 while (IsOperatorControl())
                 {
-                	//Get Joystick Values
-                	
                 	
                 	//std::cout << "z : " << inpMan.getZ() << "\n";
                 	// xbox back button switching drive modes
@@ -114,8 +116,6 @@ public:
         				IsArcade = !IsArcade;
         			}
         			
-        			
-        			
         			/*  Joystick z-axis switching drive modes
         			if (inpMan.getZ() > 0.0f)
         			{
@@ -126,9 +126,24 @@ public:
         				inpMan.setMode(FRC::inputManager::MODE_JOY_TANK);
         			}
                 	*/	
-                		
-                	
-                	
+                		//read and activate solenoids
+        			if (inpMan.getButton(5))// solenoid 1
+        			{
+        				sol1.Set(true);
+        			}
+        			else
+        			{
+        				sol1.Set(false);
+        			}
+        			if (inpMan.getButton(6))//solenoid 2
+        			{
+        				sol2.Set(true);
+        			}
+        			else 
+        			{
+        				sol2.Set(false);
+        			}
+        			
                 		//Update InputManager
                         inpMan.update();
                         
@@ -153,6 +168,7 @@ public:
                         	LCD->PrintfLine(DriverStationLCD::kUser_Line1, "ArcadeMode");
                         else
                         	LCD->PrintfLine(DriverStationLCD::kUser_Line1, "TankMode");
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line2, "Pressure Switch = %d", compressor.GetPressureSwitchValue());
                         LCD->UpdateLCD();
                         Wait(0.005); // wait for a motor update time
                         
