@@ -35,8 +35,8 @@ void FRC::inputManager::update()
             //if m1 and m2 are within some threshold, change them to be the average of eachother
             break;
         case MODE_XBOX_TANK:
-        	m1 = threshold(s1.GetY(), thresh);
-        	m2 = threshold(s1.GetRawAxis(5), thresh);
+        	m2 = threshold(s1.GetY(), thresh);
+        	m1 = threshold(s1.GetRawAxis(5), thresh);
         	break;
         }
         float diff = m1 - m2;
