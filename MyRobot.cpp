@@ -16,13 +16,20 @@ class RobotDemo : public SimpleRobot
         float distance;
         float speed;
         DriverStationLCD *LCD;
+        DigitalInput Myswitch;
+        bool IsArcade, prevArcade;
+        //Compressor compressor;
 public:
         RobotDemo():
         		inpMan(0.1f, FRC::inputManager::MODE_XBOX_TANK),
                 m1(1),
                 m2(2),
                 A1(1),
-                LCD(DriverStationLCD::GetInstance())
+                LCD(DriverStationLCD::GetInstance()),
+                Myswitch(1),
+                IsArcade(0),
+                prevArcade(0)
+                //compressor(2,1)
         {
                 //myRobot.SetExpiration(0.1);
         }
@@ -67,7 +74,6 @@ public:
             LCD->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", A1.GetVoltage()*512/5);
             LCD->PrintfLine(DriverStationLCD::kUser_Line2, "speed = %f", speed);
             LCD->UpdateLCD();
-            
             Wait(0.005); // wait for a motor update time
         	}
         }
@@ -80,20 +86,74 @@ public:
                 //myRobot.SetSafetyEnabled(false);
                 while (IsOperatorControl())
                 {
+                	//Get Joystick Values
+                	
+                	
                 	//std::cout << "z : " << inpMan.getZ() << "\n";
-        			/*if (inpMan.getZ() > 0.0f)
+                	// xbox back button switching drive modes
+        			if (inpMan.getButton(7))
+        			{
+        				while (inpMan.getButton(7))
+        				{
+        					if (IsArcade == prevArcade)
+        					{
+        					if(!IsArcade)
+        					inpMan.setMode(FRC::inputManager::MODE_XBOX_TANK);
+        					else
+        					inpMan.setMode(FRC::inputManager::MODE_XBOX_ARCADE);
+        					}
+        					else
+        					{
+        					if(IsArcade)
+        					inpMan.setMode(FRC::inputManager::MODE_XBOX_TANK);
+        					else
+        					inpMan.setMode(FRC::inputManager::MODE_XBOX_ARCADE);
+        					}
+        				}
+        				prevArcade = IsArcade;
+        				IsArcade = !IsArcade;
+        			}
+        			
+        			
+        			
+        			/*  Joystick z-axis switching drive modes
+        			if (inpMan.getZ() > 0.0f)
         			{
         				inpMan.setMode(FRC::inputManager::MODE_JOY_ARCADE);
         			}
         			else
         			{
         				inpMan.setMode(FRC::inputManager::MODE_JOY_TANK);
-        			}*/
+        			}
+                	*/	
+                		
+                	
+                	
+                		//Update InputManager
                         inpMan.update();
+                        
                         //std::cout << "motor 1 : " << inpMan.getMotor(1) << ", Motor 2 : " << inpMan.getMotor(2) << "\n";
-                        m1.Set(inpMan.getMotor(1));
-                        m2.Set(-inpMan.getMotor(2));
-                        printf("value = %d  voltage = %f  distance = %f \n", A1.GetValue(), A1.GetVoltage(), A1.GetVoltage()*512/5);
+                        //Set Motor Commands
+                        m1.Set(inpMan.getMotor(1));//Only goes half speed
+                        m2.Set(-inpMan.getMotor(2));//Only goes half speed
+                        
+                        //printf("value = %d  voltage = %f  distance = %f \n", A1.GetValue(), A1.GetVoltage(), A1.GetVoltage()*512/5);
+                        //LCD Print Commands
+                        /*LCD->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", A1.GetVoltage()*512/5);
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line2, "motor1 = %f", inpMan.getMotor(1));
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line3, "motor2 = %f", -inpMan.getMotor(2));
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line4, "button = %d", Myswitch.Get());
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line1, "xbox button = %i", inpMan.getButton(8));
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line2, "xbox button = %i", inpMan.getButton(9));
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line3, "xbox button = %i", inpMan.getButton(10));
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line4, "xbox button = %i", inpMan.getButton(6));
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line5, "xbox button = %i", inpMan.getButton(7));
+                        LCD->PrintfLine(DriverStationLCD::kUser_Line6, "xbox button = %i", inpMan.getButton(0));*/
+                        if(IsArcade)
+                        	LCD->PrintfLine(DriverStationLCD::kUser_Line1, "ArcadeMode");
+                        else
+                        	LCD->PrintfLine(DriverStationLCD::kUser_Line1, "TankMode");
+                        LCD->UpdateLCD();
                         Wait(0.005); // wait for a motor update time
                         
                 }

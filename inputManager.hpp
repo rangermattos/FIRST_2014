@@ -37,6 +37,8 @@ namespace FRC
                 float getMotor(int motor);
         		///@brief get the z-axis data off of the primary joystick
         		float getZ(void);
+        		///@brief get joystick button status
+        		bool getButton(int button);
         };
 }
 #endif // FRC2014_INPUTMANAGER

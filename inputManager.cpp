@@ -35,8 +35,12 @@ void FRC::inputManager::update()
             //if m1 and m2 are within some threshold, change them to be the average of eachother
             break;
         case MODE_XBOX_TANK:
-        	m2 = threshold(s1.GetY(), thresh);
-        	m1 = threshold(s1.GetRawAxis(5), thresh);
+        	m2 = threshold(s1.GetY() / 2.0f, thresh);
+        	m1 = threshold(s1.GetRawAxis(5) / 2.0f, thresh);
+        	break;
+        case MODE_XBOX_ARCADE:
+        	m1 = threshold((s1.GetY() + s1.GetX()) / 2.0f, thresh);
+        	m2 = threshold((s1.GetY() - s1.GetX()) / 2.0f, thresh);
         	break;
         }
         float diff = m1 - m2;
@@ -66,3 +70,17 @@ float FRC::inputManager::getZ(void)
 {
 	 return s1.GetZ();
 }
+bool FRC::inputManager::getButton(int button)
+{
+	// Xbox button1=A
+	// xbox button2=B
+	// xbox button3=X
+	// xbox button4=Y
+	// xbox button5=leftbump
+	// xbox button6=rightbump
+	// xbox button7=back
+	// xbox button8=start
+	// xbox axis3=triggers
+	 return s1.GetRawButton(button);
+}
+
