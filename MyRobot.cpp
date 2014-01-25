@@ -1,6 +1,8 @@
 #include "WPILib.h"
 #include <iostream>
 #include "inputManager.hpp"
+#include "deviceManager.hpp"
+#include "guiManager.hpp"
 
 /**
  * This is a demo program showing the use of the RobotBase class.
@@ -10,42 +12,28 @@
  */ 
 class RobotDemo : public SimpleRobot
 {
-	//RobotDrive myRobot; // robot drive system
 	FRC::inputManager inpMan;
-	Talon m1, m2;
-	AnalogChannel A1;
+	FRC::deviceManager devices;
+	FRC::guiManager guiMan;
 	float distance;
 	float speed;
 	bool IsArcade, prevArcade;
-	DriverStationLCD *display;
-	DigitalInput switch1;
-	Compressor compressor;
-	Solenoid sol1, sol2; // sol1 = pulls out, sol 2 = pulls in
-	bool pistonExtended;
-	CANJaguar *can;
-	Encoder encoder;
-	DriverStationEnhancedIO *displayenhanced;
+	//DriverStationLCD *display;
+	//DriverStationEnhancedIO *displayenhanced;
 	
 public:
 	RobotDemo():
 		inpMan(0.1f, 								// threshold of 0.1f
 				FRC::inputManager::MODE_XBOX_TANK),	// xbox tank mode to start
-		m1(1),
-		m2(2),
-		A1(1),
+		devices(),
+		guiMan(),
 		IsArcade(0), 								// not arcade to start
-		prevArcade(0), 								//previously not arcade
-		display(DriverStationLCD::GetInstance()),
-		switch1(1),
-		compressor(2,1),
-		sol1(1),
-		sol2(2),
-		pistonExtended(0),
-		can (new CANJaguar(1)),
-		encoder(1, 2, true)
+		prevArcade(0) 								//previously not arcade
+		//display(DriverStationLCD::GetInstance())
 		{
 			//myRobot.SetExpiration(0.1);
-			encoder.Start();
+			devices.startEncoder();
+			devices.startCompressor();
 		}
 
         /**
@@ -56,15 +44,15 @@ public:
         	while (IsAutonomous())
         	{
                 //myRobot.SetSafetyEnabled(false);
-        		distance = A1.GetVoltage()*512/5;
+        		//distance = A1.GetVoltage()*512/5;
         		if (distance < 48) // less than 48 inches / 4 feet
         		{
         			// backwards
         			speed = -0.021 * distance + 1; // 0.021 = 1/48
         			speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
         			speed /= 2;
-        			m1.Set(speed);
-        			m2.Set(-speed);
+        			devices.setSpeed(1, speed);
+        			devices.setSpeed(2, -speed);
         		}
         		else if(distance > 72 ) // more than 72 inches / 6 feet
         		{
@@ -72,20 +60,20 @@ public:
         			speed = 0.021 * (distance-72);
         			speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
         			speed /= 2;
-        			m1.Set(-speed);
-        			m2.Set(speed);
+        			devices.setSpeed(1, -speed);
+        			devices.setSpeed(2, speed);
         		}
         		else 
         		{
         			// stopped
         			speed = 0.0f;
-        			m1.Set(speed);
-        			m2.Set(speed);
+        			devices.setSpeed(1, speed);
+        			devices.setSpeed(2, speed);
         		}
         		// print distance and speed
-        		display->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", distance);
-        		display->PrintfLine(DriverStationLCD::kUser_Line2, "speed = %f", speed);
-        		display->UpdateLCD();
+        		//display->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", distance);
+        		//display->PrintfLine(DriverStationLCD::kUser_Line2, "speed = %f", speed);
+        		//display->UpdateLCD();
         		Wait(0.005); // wait for a motor update time
         	}
         }
@@ -95,8 +83,7 @@ public:
          */
         void OperatorControl()
         {
-        	displayenhanced = &DriverStation::GetInstance()->GetEnhancedIO();
-        	compressor.Start();
+        	//displayenhanced = &DriverStation::GetInstance()->GetEnhancedIO();
             //myRobot.SetSafetyEnabled(false);
             while (IsOperatorControl())
             {
@@ -138,23 +125,23 @@ public:
         		{
         			while (inpMan.getButton(3))
         			{
-        				if (!pistonExtended)
+        				if (!devices.isPistonExtended())
         				{
-        					sol1.Set(true);
-        					sol2.Set(false);
+        					devices.setSolenoid(1, true);
+        					devices.setSolenoid(2, false);
         				}
         				else
         				{
-        					sol1.Set(false);
-        					sol2.Set(true);
+        					devices.setSolenoid(1, false);
+        					devices.setSolenoid(2, true);
         				}
         			}
-    				pistonExtended = !pistonExtended;
+    				devices.togglePistonExtended();
         		}
         		else
         		{
-        			sol1.Set(false);
-        			sol2.Set(false);
+        			devices.setSolenoid(1, false);
+        			devices.setSolenoid(2, false);
         		}
         		
                 //Update InputManager
@@ -162,8 +149,8 @@ public:
                         
                 //std::cout << "motor 1 : " << inpMan.getMotor(1) << ", Motor 2 : " << inpMan.getMotor(2) << "\n";
                 //Set Motor Commands
-                m1.Set(inpMan.getMotor(1));
-                m2.Set(-inpMan.getMotor(2));
+                devices.setSpeed(1, inpMan.getMotor(1));
+                devices.setSpeed(2, -inpMan.getMotor(2));
                         
                 //LCD Print Commands
                 /*display->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", A1.GetVoltage()*512/5);
@@ -177,8 +164,8 @@ public:
                 display->PrintfLine(DriverStationLCD::kUser_Line5, "xbox button = %i", inpMan.getButton(7));
                 display->PrintfLine(DriverStationLCD::kUser_Line6, "xbox button = %i", inpMan.getButton(0));*/
                 
-                display->PrintfLine(DriverStationLCD::kUser_Line6, "xbox button = %i", inpMan.getButton(0));
-                display->PrintfLine(DriverStationLCD::kUser_Line2, "EncoderValue: %ld", encoder.GetRaw());
+                //display->PrintfLine(DriverStationLCD::kUser_Line6, "xbox button = %i", inpMan.getButton(0));
+                //display->PrintfLine(DriverStationLCD::kUser_Line2, "EncoderValue: %ld", devices.getEncoderValue());
                 
                 /*if(IsArcade)
                    	display->PrintfLine(DriverStationLCD::kUser_Line1, "ArcadeMode");
@@ -198,12 +185,13 @@ public:
                 //display->PrintfLine(DriverStationLCD::kUser_Line3, "Switch = %i", displayenhanced->GetDitigal(2));
                 
                 // Update Driver Station LCD Display
-                display->UpdateLCD();
+                guiMan.print(1, "Button 1 pressed: %d", inpMan.getButton(1));
+                guiMan.update();
                 Wait(0.005); // wait for a motor update time
                         
                 }
 
-            delete can;
+            //delete can;
         }
         
         /**

@@ -8,6 +8,8 @@ FRC::inputManager::inputManager(float threshold, unsigned char mode) :
 {
 	thresh = threshold;
 	setMode(mode);
+	enhancedIO = &DriverStation::GetInstance()->GetEnhancedIO();
+
 }
 
 unsigned char FRC::inputManager::getMode()
