@@ -206,6 +206,7 @@ public:
                 // Enhanced IO Display and Interface Commands
                 //displayenhanced->SetLED(1, true);
                 //display->PrintfLine(DriverStationLCD::kUser_Line3, "x accel = %d", displayenhanced->GetAcceleration(DriverStationEnhancedIO::kAccelX));
+                //display->PrintfLine(DriverStationLCD::kUser_Line3, "Switch = %i", displayenhanced->GetDitigal(2));
                 
                 // Update Driver Station LCD Display
                 display->UpdateLCD();
