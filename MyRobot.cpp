@@ -1,6 +1,7 @@
 #include "WPILib.h"
 #include <iostream>
 #include "inputManager.hpp"
+
 /**
  * This is a demo program showing the use of the RobotBase class.
  * The SimpleRobot class is the base of a robot application that will automatically call your
@@ -19,7 +20,12 @@ class RobotDemo : public SimpleRobot
 	DriverStationLCD *display;
 	DigitalInput switch1;
 	Compressor compressor;
-	Solenoid sol1, sol2;
+	Solenoid sol1, sol2; // sol1 = pulls out, sol 2 = pulls in
+	bool pistonExtended;
+	CANJaguar *can;
+	Encoder encoder;
+	DriverStationEnhancedIO *displayenhanced;
+	
 public:
 	RobotDemo():
 		inpMan(0.1f, 								// threshold of 0.1f
@@ -33,9 +39,13 @@ public:
 		switch1(1),
 		compressor(2,1),
 		sol1(1),
-		sol2(2)
+		sol2(2),
+		pistonExtended(0),
+		can (new CANJaguar(1)),
+		encoder(1, 2, true)
 		{
 			//myRobot.SetExpiration(0.1);
+			encoder.Start();
 		}
 
         /**
@@ -46,40 +56,37 @@ public:
         	while (IsAutonomous())
         	{
                 //myRobot.SetSafetyEnabled(false);
-                //myRobot.Drive(-0.5, 0.0);         // drive forwards half speed
-                //Wait(2.0);                      	// for 2 seconds
-                //myRobot.Drive(0.0, 0.0);         	// stop robot
-            //printf("value = %d  voltage = %f  distance = %f \n", A1.GetValue(), A1.GetVoltage(), A1.GetVoltage()*512/5);
-            distance = A1.GetVoltage()*512/5;
-            if (distance < 48) // less than 48 inches / 4 feet
-            {
-            	// backwards
-            	speed = -0.021 * distance + 1; // 0.021 = 1/48
-            	speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
-            	speed /= 2;
-            	m1.Set(speed);
-            	m2.Set(-speed);
-            }
-            else if(distance > 72 ) // more than 72 inches / 6 feet
-            {
-            	// forwards
-            	speed = 0.021 * (distance-72);
-            	speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
-            	speed /= 2;
-            	m1.Set(-speed);
-            	m2.Set(speed);
-            }
-            else 
-            {
-            	// stopped
-            	speed = 0.0f;
-            	m1.Set(speed);
-            	m2.Set(speed);
-            }
-            display->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", distance);
-            display->PrintfLine(DriverStationLCD::kUser_Line2, "speed = %f", speed);
-            display->UpdateLCD();
-            Wait(0.005); // wait for a motor update time
+        		distance = A1.GetVoltage()*512/5;
+        		if (distance < 48) // less than 48 inches / 4 feet
+        		{
+        			// backwards
+        			speed = -0.021 * distance + 1; // 0.021 = 1/48
+        			speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
+        			speed /= 2;
+        			m1.Set(speed);
+        			m2.Set(-speed);
+        		}
+        		else if(distance > 72 ) // more than 72 inches / 6 feet
+        		{
+        			// forwards
+        			speed = 0.021 * (distance-72);
+        			speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
+        			speed /= 2;
+        			m1.Set(-speed);
+        			m2.Set(speed);
+        		}
+        		else 
+        		{
+        			// stopped
+        			speed = 0.0f;
+        			m1.Set(speed);
+        			m2.Set(speed);
+        		}
+        		// print distance and speed
+        		display->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", distance);
+        		display->PrintfLine(DriverStationLCD::kUser_Line2, "speed = %f", speed);
+        		display->UpdateLCD();
+        		Wait(0.005); // wait for a motor update time
         	}
         }
 
@@ -88,29 +95,27 @@ public:
          */
         void OperatorControl()
         {
+        	displayenhanced = &DriverStation::GetInstance()->GetEnhancedIO();
         	compressor.Start();
             //myRobot.SetSafetyEnabled(false);
             while (IsOperatorControl())
             {
             	//std::cout << "z : " << inpMan.getZ() << "\n";
-            	// xbox back button switching drive modes
+            	// xbox back button / joystick button 7 : switching drive modes
         		if (inpMan.getButton(7))
         		{
         			while (inpMan.getButton(7))
         			{
-        				if (IsArcade == prevArcade)
+        				if (IsArcade != prevArcade)
         				{
-        					if(!IsArcade)
-        					inpMan.setMode(FRC::inputManager::MODE_XBOX_TANK);
+        					if(IsArcade && inpMan.getMode() == FRC::inputManager::MODE_XBOX_ARCADE)
+        						inpMan.setMode(FRC::inputManager::MODE_XBOX_TANK);
+        					else if(!IsArcade && inpMan.getMode() == FRC::inputManager::MODE_XBOX_TANK)
+        						inpMan.setMode(FRC::inputManager::MODE_XBOX_ARCADE);
+        					else if(IsArcade && inpMan.getMode() == FRC::inputManager::MODE_JOY_ARCADE)
+        						inpMan.setMode(FRC::inputManager::MODE_JOY_TANK);
         					else
-        					inpMan.setMode(FRC::inputManager::MODE_XBOX_ARCADE);
-        				}
-        				else
-        				{
-        					if(IsArcade)
-        					inpMan.setMode(FRC::inputManager::MODE_XBOX_TANK);
-        					else
-        					inpMan.setMode(FRC::inputManager::MODE_XBOX_ARCADE);
+        						inpMan.setMode(FRC::inputManager::MODE_JOY_ARCADE);
         				}
         			}
         			prevArcade = IsArcade;
@@ -129,20 +134,26 @@ public:
                 */
         		
                 //read and activate solenoids
-        		if (inpMan.getButton(5))// solenoid 1
+        		if (inpMan.getButton(3))	// toggle solenoids with x button / 3 button
         		{
-        			sol1.Set(true);
+        			while (inpMan.getButton(3))
+        			{
+        				if (!pistonExtended)
+        				{
+        					sol1.Set(true);
+        					sol2.Set(false);
+        				}
+        				else
+        				{
+        					sol1.Set(false);
+        					sol2.Set(true);
+        				}
+        			}
+    				pistonExtended = !pistonExtended;
         		}
         		else
         		{
         			sol1.Set(false);
-        		}
-        		if (inpMan.getButton(6))//solenoid 2
-        		{
-        			sol2.Set(true);
-        		}
-        		else 
-        		{
         			sol2.Set(false);
         		}
         		
@@ -151,8 +162,8 @@ public:
                         
                 //std::cout << "motor 1 : " << inpMan.getMotor(1) << ", Motor 2 : " << inpMan.getMotor(2) << "\n";
                 //Set Motor Commands
-                m1.Set(inpMan.getMotor(1));//Only goes half speed
-                m2.Set(-inpMan.getMotor(2));//Only goes half speed
+                m1.Set(inpMan.getMotor(1));
+                m2.Set(-inpMan.getMotor(2));
                         
                 //LCD Print Commands
                 /*display->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", A1.GetVoltage()*512/5);
@@ -166,17 +177,32 @@ public:
                 display->PrintfLine(DriverStationLCD::kUser_Line5, "xbox button = %i", inpMan.getButton(7));
                 display->PrintfLine(DriverStationLCD::kUser_Line6, "xbox button = %i", inpMan.getButton(0));*/
                 
-                if(IsArcade)
+                display->PrintfLine(DriverStationLCD::kUser_Line6, "xbox button = %i", inpMan.getButton(0));
+                display->PrintfLine(DriverStationLCD::kUser_Line2, "EncoderValue: %ld", encoder.GetRaw());
+                
+                /*if(IsArcade)
                    	display->PrintfLine(DriverStationLCD::kUser_Line1, "ArcadeMode");
                 else
                    	display->PrintfLine(DriverStationLCD::kUser_Line1, "TankMode");
                 
-                display->PrintfLine(DriverStationLCD::kUser_Line2, "Pressure Switch = %d", compressor.GetPressureSwitchValue());
+                display->PrintfLine(DriverStationLCD::kUser_Line2, "Pressure Switch = %d", compressor.GetPressureSwitchValue());*/
                 
+                // LCD Jaguar Can Print Commands
+                //display->PrintfLine(DriverStationLCD::kUser_Line1, "Voltage: %f", can->GetOutputVoltage());
+                //display->PrintfLine(DriverStationLCD::kUser_Line2, "Current: %f", can->GetOutputCurrent());
+                //display->PrintfLine(DriverStationLCD::kUser_Line3, "Temperature: %f", can->GetTemperature());
+                
+                // Enhanced IO Display and Interface Commands
+                //displayenhanced->SetLED(1, true);
+                //display->PrintfLine(DriverStationLCD::kUser_Line3, "x accel = %d", displayenhanced->GetAcceleration(DriverStationEnhancedIO::kAccelX));
+                
+                // Update Driver Station LCD Display
                 display->UpdateLCD();
                 Wait(0.005); // wait for a motor update time
                         
                 }
+
+            delete can;
         }
         
         /**
