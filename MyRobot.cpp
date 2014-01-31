@@ -3,7 +3,7 @@
 #include "inputManager.hpp"
 #include "deviceManager.hpp"
 #include "guiManager.hpp"
-
+#include "netManager.hpp"
 /**
  * This is a demo program showing the use of the RobotBase class.
  * The SimpleRobot class is the base of a robot application that will automatically call your
@@ -20,7 +20,7 @@ class RobotDemo : public SimpleRobot
 	bool IsArcade, prevArcade;
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
-	
+	netManager netMan;
 public:
 	RobotDemo():
 		inpMan(0.1f, 								// threshold of 0.1f
@@ -28,12 +28,14 @@ public:
 		devices(),
 		guiMan(),
 		IsArcade(0), 								// not arcade to start
-		prevArcade(0) 								//previously not arcade
+		prevArcade(0), 								//previously not arcade
 		//display(DriverStationLCD::GetInstance())
+		netMan(&guiMan)
 		{
 			//myRobot.SetExpiration(0.1);
 			devices.startEncoder();
 			devices.startCompressor();
+			netMan.connect("10.51.48.50", 1180);
 		}
 
         /**
