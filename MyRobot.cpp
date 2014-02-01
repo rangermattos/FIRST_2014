@@ -3,7 +3,7 @@
 #include "inputManager.hpp"
 #include "deviceManager.hpp"
 #include "guiManager.hpp"
-#include "netManager.hpp"
+//#include "netManager.hpp"
 /**
  * This is a demo program showing the use of the RobotBase class.
  * The SimpleRobot class is the base of a robot application that will automatically call your
@@ -18,9 +18,10 @@ class RobotDemo : public SimpleRobot
 	float distance;
 	float speed;
 	bool IsArcade, prevArcade;
+	DriverStation *drive;
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
-	netManager netMan;
+	//netManager netMan;
 public:
 	RobotDemo():
 		inpMan(0.1f, 								// threshold of 0.1f
@@ -29,13 +30,14 @@ public:
 		guiMan(),
 		IsArcade(0), 								// not arcade to start
 		prevArcade(0), 								//previously not arcade
+		drive(DriverStation::GetInstance())
 		//display(DriverStationLCD::GetInstance())
-		netMan(&guiMan)
+		//netMan(&guiMan)
 		{
 			//myRobot.SetExpiration(0.1);
 			devices.startEncoder();
 			devices.startCompressor();
-			netMan.connect("10.51.48.50", 1180);
+			//netMan.connect("10.51.48.50", 1180);
 		}
 
         /**
@@ -87,6 +89,7 @@ public:
         {
         	//displayenhanced = &DriverStation::GetInstance()->GetEnhancedIO();
             //myRobot.SetSafetyEnabled(false);
+        	int i = 0;
             while (IsOperatorControl())
             {
             	//std::cout << "z : " << inpMan.getZ() << "\n";
@@ -153,6 +156,18 @@ public:
                 //Set Motor Commands
                 devices.setSpeed(1, inpMan.getMotor(1));
                 devices.setSpeed(2, -inpMan.getMotor(2));
+                
+                //Compressor On/Off
+                if (drive->GetDigitalIn(1) == 1)
+                {
+                	guiMan.print(1, "Compressor On");
+                	devices.startCompressor();
+                }
+                else if (drive->GetDigitalIn(1) == 0)
+                {
+                	guiMan.print(1, "Compressor Off");
+                	devices.stopCompressor();
+                }
                         
                 //LCD Print Commands
                 /*display->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", A1.GetVoltage()*512/5);
@@ -186,14 +201,19 @@ public:
                 //display->PrintfLine(DriverStationLCD::kUser_Line3, "x accel = %d", displayenhanced->GetAcceleration(DriverStationEnhancedIO::kAccelX));
                 //display->PrintfLine(DriverStationLCD::kUser_Line3, "Switch = %i", displayenhanced->GetDitigal(2));
                 
+                //guiMan.print(1, "Button 1 pressed: %d", inpMan.getButton(1));
+                
+                // Compressor Off
+                //guiMan.print(1, "DigitalIn 1 = %i", drive->GetDigitalIn(1));
+                
                 // Update Driver Station LCD Display
-                guiMan.print(1, "Button 1 pressed: %d", inpMan.getButton(1));
                 guiMan.update();
+                printf("counter = %i\n", i++);
                 Wait(0.005); // wait for a motor update time
                         
                 }
 
-            //delete can;
+            	//delete can;
         }
         
         /**

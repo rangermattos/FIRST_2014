@@ -11,14 +11,16 @@ namespace FRC
         class deviceManager 
         {
         private:
-        	Talon talon1, talon2;
+        	//Talon talon1, talon2;
+        	Victor victor1, victor2;
         	AnalogChannel ultrasonic;
         	DigitalInput switch1;
         	Compressor compressor;
-        	Solenoid sol1, sol2; // sol1 = pulls out, sol 2 = pulls in
-        	CANJaguar *can;     	
+        	Solenoid sol1, sol2, sol3, sol4; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
+        	CANJaguar *can1; 
+        	CANJaguar *can2;
         	bool pistonExtended;
-        	Encoder encoder;
+        	Encoder encoder1, encoder2;
         	//float speed;
         	//float distance;
         	//float motorcommand1, motorcommand2;
@@ -32,9 +34,10 @@ namespace FRC
         	void setSolenoid(int sol, bool set);
         	bool isPistonExtended();
         	void togglePistonExtended();
-        	int getEncoderValue();
+        	int getEncoderValue(int encoder);
         	void startEncoder();
         	void startCompressor();
+        	void stopCompressor();
         };
 }
 #endif // FRC2014_GUIMANAGER
