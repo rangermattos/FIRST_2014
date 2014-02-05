@@ -1,23 +1,25 @@
 #include "deviceManager.hpp"
 #include <iostream>
 FRC::deviceManager::deviceManager() :
-	//talon1(1),
-	//talon2(2),
-	victor1(1),
-	victor2(2),
-	ultrasonic(1),
-	switch1(1),
-	compressor(2,1),
-	sol1(1),
-	sol2(2),
-	sol3(3),
-	sol4(4),
-	pistonExtended(0),
-	encoder1(1, 2, true),
-	encoder2(1, 2, true)
+	elevmotor1(1),
+	elevmotor2(2),
+	drivemotor1(1),
+	drivemotor2(2),
+	elevpotheight(1),
+	gyro(2),
+	ultrasonic(3),
+	elevhomeswitch(2),
+	compressor(1,1),
+	armfire(1),
+	lowsp(2),
+	highsp(3),
+	pistonExtended(0)
+	//encoder1(1, 2, true),
+	//encoder2(1, 2, true),
 {
-       can1 = new CANJaguar(1);
-       can2 = new CANJaguar(2);
+       vacmotor1 = new CANJaguar(1);
+       vacmotor2 = new CANJaguar(2);
+       armmotor = new CANJaguar(3);
 }
 
 void FRC::deviceManager::setSpeed(int motor, float speed)
@@ -25,10 +27,10 @@ void FRC::deviceManager::setSpeed(int motor, float speed)
 	switch(motor)
 	{
 	case 1:
-		victor1.Set(speed);
+		drivemotor1.Set(speed);
 		break;
 	case 2:
-		victor2.Set(speed);
+		drivemotor2.Set(speed);
 		break;
 	}
 }
@@ -38,10 +40,13 @@ void FRC::deviceManager::setSolenoid(int sol, bool set)
 	switch(sol)
 	{
 	case 1:
-		sol1.Set(set);
+		armfire.Set(set);
 		break;
 	case 2:
-		sol2.Set(set);
+		lowsp.Set(set);
+		break;
+	case 3:
+		highsp.Set(set);
 		break;
 	}
 }
@@ -56,7 +61,7 @@ void FRC::deviceManager::togglePistonExtended()
 	pistonExtended = !pistonExtended;
 }
 
-int FRC::deviceManager::getEncoderValue(int encoder)// may need changes later
+/*int FRC::deviceManager::getEncoderValue(int encoder)// may need changes later
 {
 	if (encoder == 1)
 		return encoder1.GetRaw();
@@ -68,7 +73,7 @@ void FRC::deviceManager::startEncoder()
 {
 	encoder1.Start();
 	encoder2.Start();
-}
+}*/
 
 void FRC::deviceManager::startCompressor()
 {

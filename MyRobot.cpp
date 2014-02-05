@@ -35,7 +35,7 @@ public:
 		//netMan(&guiMan)
 		{
 			//myRobot.SetExpiration(0.1);
-			devices.startEncoder();
+			//devices.startEncoder();
 			devices.startCompressor();
 			//netMan.connect("10.51.48.50", 1180);
 		}
@@ -87,12 +87,15 @@ public:
          */
         void OperatorControl()
         {
-        	//displayenhanced = &DriverStation::GetInstance()->GetEnhancedIO();
             //myRobot.SetSafetyEnabled(false);
         	int i = 0;
             while (IsOperatorControl())
             {
-            	//std::cout << "z : " << inpMan.getZ() << "\n";
+            	//---------------------DRIVER CODE--------------------------------
+            	//----------------------------------------------------------------
+            	//----------------------------------------------------------------
+                
+            	//-------------------ARCADE TANK SWITCH------------------------
             	// xbox back button / joystick button 7 : switching drive modes
         		if (inpMan.getButton(7))
         		{
@@ -113,99 +116,69 @@ public:
         			prevArcade = IsArcade;
         			IsArcade = !IsArcade;
         		}
-        			
-        		/*  Joystick z-axis switching drive modes
-        		if (inpMan.getZ() > 0.0f)
-        		{
-        			inpMan.setMode(FRC::inputManager::MODE_JOY_ARCADE);
-        		}
-        		else
-        		{
-        			inpMan.setMode(FRC::inputManager::MODE_JOY_TANK);
-        		}
-                */
         		
+        		//-----------------HIGH LOW SPEED SWITCHING--------------------------
                 //read and activate solenoids
-        		if (inpMan.getButton(3))	// toggle solenoids with x button / 3 button
+        		if (inpMan.getButton(6))	// toggle solenoids with x button / 3 button
         		{
-        			while (inpMan.getButton(3))
+        			while (inpMan.getButton(6))
         			{
         				if (!devices.isPistonExtended())
         				{
-        					devices.setSolenoid(1, true);
-        					devices.setSolenoid(2, false);
+        					devices.setSolenoid(2, true);
+        					devices.setSolenoid(3, false);
+        					guiMan.print(0, "Speed Low");
         				}
         				else
         				{
-        					devices.setSolenoid(1, false);
-        					devices.setSolenoid(2, true);
+        					devices.setSolenoid(2, false);
+        					devices.setSolenoid(3, true);
+        					guiMan.print(0, "Speed High");
         				}
         			}
     				devices.togglePistonExtended();
         		}
         		else
         		{
-        			devices.setSolenoid(1, false);
-        			devices.setSolenoid(2, false);
+        			devices.setSolenoid(2, true);
+        			devices.setSolenoid(3, false);
+        			guiMan.print(0, "Speed Low");
         		}
         		
-                //Update InputManager
-                inpMan.update();
                         
-                //std::cout << "motor 1 : " << inpMan.getMotor(1) << ", Motor 2 : " << inpMan.getMotor(2) << "\n";
                 //Set Motor Commands
                 devices.setSpeed(1, inpMan.getMotor(1));
                 devices.setSpeed(2, -inpMan.getMotor(2));
                 
-                //Compressor On/Off
-                if (drive->GetDigitalIn(1) == 1)
-                {
-                	guiMan.print(1, "Compressor On");
-                	devices.startCompressor();
-                }
-                else if (drive->GetDigitalIn(1) == 0)
-                {
-                	guiMan.print(1, "Compressor Off");
-                	devices.stopCompressor();
-                }
-                        
-                //LCD Print Commands
-                /*display->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", A1.GetVoltage()*512/5);
-                display->PrintfLine(DriverStationLCD::kUser_Line2, "motor1 = %f", inpMan.getMotor(1));
-                display->PrintfLine(DriverStationLCD::kUser_Line3, "motor2 = %f", -inpMan.getMotor(2));
-                display->PrintfLine(DriverStationLCD::kUser_Line4, "button = %d", switch1.Get());
-                display->PrintfLine(DriverStationLCD::kUser_Line1, "xbox button = %i", inpMan.getButton(8));
-                display->PrintfLine(DriverStationLCD::kUser_Line2, "xbox button = %i", inpMan.getButton(9));
-                display->PrintfLine(DriverStationLCD::kUser_Line3, "xbox button = %i", inpMan.getButton(10));
-                display->PrintfLine(DriverStationLCD::kUser_Line4, "xbox button = %i", inpMan.getButton(6));
-                display->PrintfLine(DriverStationLCD::kUser_Line5, "xbox button = %i", inpMan.getButton(7));
-                display->PrintfLine(DriverStationLCD::kUser_Line6, "xbox button = %i", inpMan.getButton(0));*/
+                //---------------------SHOOTER CODE-------------------------------
+                //----------------------------------------------------------------
+                //----------------------------------------------------------------
                 
-                //display->PrintfLine(DriverStationLCD::kUser_Line6, "xbox button = %i", inpMan.getButton(0));
-                //display->PrintfLine(DriverStationLCD::kUser_Line2, "EncoderValue: %ld", devices.getEncoderValue());
+                //---------------------COMPRESSOR ON/OFF---------------------------
+                                //Compressor On/Off
+                                if (drive->GetDigitalIn(1) == 1)
+                                {
+                                	guiMan.print(1, "Compressor On");
+                                	devices.startCompressor();
+                                }
+                                else if (drive->GetDigitalIn(1) == 0)
+                                {
+                                	guiMan.print(1, "Compressor Off");
+                                	devices.stopCompressor();
+                                }
+                                
+                //Update InputManager
+                inpMan.update();
                 
-                /*if(IsArcade)
-                   	display->PrintfLine(DriverStationLCD::kUser_Line1, "ArcadeMode");
-                else
-                   	display->PrintfLine(DriverStationLCD::kUser_Line1, "TankMode");
+                //------------------LCD PRINTS--------------------------------
+                //------------------------------------------------------------
+                //------------------------------------------------------------
                 
-                display->PrintfLine(DriverStationLCD::kUser_Line2, "Pressure Switch = %d", compressor.GetPressureSwitchValue());*/
+                //------------------GUI PRINTS FOR DRIVER----------------------
+                guiMan.print(2, "Left Motor = %f", -inpMan.getMotor(1));
+                guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
                 
-                // LCD Jaguar Can Print Commands
-                //display->PrintfLine(DriverStationLCD::kUser_Line1, "Voltage: %f", can->GetOutputVoltage());
-                //display->PrintfLine(DriverStationLCD::kUser_Line2, "Current: %f", can->GetOutputCurrent());
-                //display->PrintfLine(DriverStationLCD::kUser_Line3, "Temperature: %f", can->GetTemperature());
-                
-                // Enhanced IO Display and Interface Commands
-                //displayenhanced->SetLED(1, true);
-                //display->PrintfLine(DriverStationLCD::kUser_Line3, "x accel = %d", displayenhanced->GetAcceleration(DriverStationEnhancedIO::kAccelX));
-                //display->PrintfLine(DriverStationLCD::kUser_Line3, "Switch = %i", displayenhanced->GetDitigal(2));
-                
-                //guiMan.print(1, "Button 1 pressed: %d", inpMan.getButton(1));
-                
-                // Compressor Off
-                //guiMan.print(1, "DigitalIn 1 = %i", drive->GetDigitalIn(1));
-                
+                //-----------------UPDATES THE LCD--------------------
                 // Update Driver Station LCD Display
                 guiMan.update();
                 printf("counter = %i\n", i++);
