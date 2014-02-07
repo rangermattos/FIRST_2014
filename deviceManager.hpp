@@ -39,6 +39,8 @@ namespace FRC
         	//void startEncoder();
         	void startCompressor();
         	void stopCompressor();
+        	void setPositionReference();
+        	double PotPosition();
         };
 }
 #endif // FRC2014_GUIMANAGER

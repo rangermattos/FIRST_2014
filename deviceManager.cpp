@@ -17,9 +17,9 @@ FRC::deviceManager::deviceManager() :
 	//encoder1(1, 2, true),
 	//encoder2(1, 2, true),
 {
-       vacmotor1 = new CANJaguar(1);
-       vacmotor2 = new CANJaguar(2);
-       armmotor = new CANJaguar(3);
+       vacmotor1 = new CANJaguar(2);
+       vacmotor2 = new CANJaguar(3);
+       armmotor = new CANJaguar(1);
 }
 
 void FRC::deviceManager::setSpeed(int motor, float speed)
@@ -84,4 +84,16 @@ void FRC::deviceManager::stopCompressor()
 {
 	compressor.Stop();
 }
+
+void FRC::deviceManager::setPositionReference()
+{
+	armmotor->ChangeControlMode(CANJaguar::kPosition);
+	armmotor->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
+}
+
+double FRC::deviceManager::PotPosition()
+{
+	return armmotor->GetPosition();
+}
+
 
