@@ -17,8 +17,8 @@ FRC::deviceManager::deviceManager() :
 	//encoder1(1, 2, true),
 	//encoder2(1, 2, true),
 {
-       vacmotor1 = new CANJaguar(1);
-       vacmotor2 = new CANJaguar(2);
+       vacMotor1 = new CANJaguar(1);
+       vacMotor2 = new CANJaguar(2);
        armmotor = new CANJaguar(3);
 }
 
@@ -83,5 +83,18 @@ void FRC::deviceManager::startCompressor()
 void FRC::deviceManager::stopCompressor()
 {
 	compressor.Stop();
+}
+
+float FRC::deviceManager::getCANJagCurrent(int CANJag)
+{
+	switch(CANJag)
+	{
+	case 1:
+		return vacMotor1->GetOutputCurrent();
+	case 2:
+		return vacMotor2->GetOutputCurrent();
+	case 3:
+		return armmotor->GetOutputCurrent();
+	}
 }
 

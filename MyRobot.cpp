@@ -3,6 +3,7 @@
 #include "inputManager.hpp"
 #include "deviceManager.hpp"
 #include "guiManager.hpp"
+#include "vacManager.hpp"
 //#include "netManager.hpp"
 /**
  * This is a demo program showing the use of the RobotBase class.
@@ -15,6 +16,7 @@ class RobotDemo : public SimpleRobot
 	FRC::inputManager inpMan;
 	FRC::deviceManager devices;
 	FRC::guiManager guiMan;
+	FRC::vacManager vacMan;
 	float distance;
 	float speed;
 	bool IsArcade, prevArcade;
@@ -30,9 +32,10 @@ public:
 		guiMan(),
 		IsArcade(0), 								// not arcade to start
 		prevArcade(0), 								//previously not arcade
-		drive(DriverStation::GetInstance())
+		drive(DriverStation::GetInstance()),
 		//display(DriverStationLCD::GetInstance())
 		//netMan(&guiMan)
+		vacMan(&inpMan, &devices, &guiMan)
 		{
 			//myRobot.SetExpiration(0.1);
 			//devices.startEncoder();
@@ -154,7 +157,12 @@ public:
                 //----------------------------------------------------------------
                 //----------------------------------------------------------------
                 
-                //---------------------COMPRESSOR ON/OFF---------------------------
+                //---------------------MANAGE VACUUM SHOOTING---------------------
+                //---------------------button 3 shoots----------------------------
+                vacMan.vacuum();
+                
+                
+                //---------------------COMPRESSOR ON/OFF--------------------------
                                 //Compressor On/Off
                                 if (drive->GetDigitalIn(1) == 1)
                                 {
@@ -184,9 +192,8 @@ public:
                 printf("counter = %i\n", i++);
                 Wait(0.005); // wait for a motor update time
                         
-                }
-
-            	//delete can;
+               }
+            
         }
         
         /**

@@ -18,7 +18,7 @@ namespace FRC
         	Compressor compressor;
         	Solenoid armfire, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
         	bool pistonExtended;
-        	CANJaguar *vacmotor1, *vacmotor2, *armmotor; 
+        	CANJaguar *vacMotor1, *vacMotor2, *armmotor; 
         	//CANJaguar *can2;
         	//CANJaguar *can3;
         	//Encoder encoder1, encoder2;
@@ -39,6 +39,7 @@ namespace FRC
         	//void startEncoder();
         	void startCompressor();
         	void stopCompressor();
+        	float getCANJagCurrent(int CANJag);
         };
 }
 #endif // FRC2014_GUIMANAGER
