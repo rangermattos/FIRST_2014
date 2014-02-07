@@ -92,6 +92,7 @@ public:
         {
             //myRobot.SetSafetyEnabled(false);
         	int i = 0;
+        	devices.setPositionReference(1, 2);
             while (IsOperatorControl())
             {
             	//---------------------DRIVER CODE--------------------------------
@@ -161,6 +162,11 @@ public:
                 //---------------------button 3 shoots----------------------------
                 vacMan.vacuum();
                 
+                if(inpMan.getButton(3))
+                {
+                	vacMan.shoot();
+                }
+                
                 
                 //---------------------COMPRESSOR ON/OFF--------------------------
                                 //Compressor On/Off
@@ -185,6 +191,7 @@ public:
                 //------------------GUI PRINTS FOR DRIVER----------------------
                 guiMan.print(2, "Left Motor = %f", -inpMan.getMotor(1));
                 guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
+                guiMan.print(4, "Potentiometer = %f", devices.PotPosition());
                 
                 //-----------------UPDATES THE LCD--------------------
                 // Update Driver Station LCD Display

@@ -20,6 +20,7 @@ namespace FRC
 	public:
 		vacManager(FRC::inputManager * inpMan, FRC::deviceManager * devMan, FRC::guiManager * guiMan);
 		void vacuum();
+		void shoot();
 	};
 }
 #endif

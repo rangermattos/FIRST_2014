@@ -6,12 +6,14 @@ FRC::vacManager::vacManager(FRC::inputManager * inpMan, FRC::deviceManager * dev
 	inputMan = inpMan;
 	devices = devMan;
 	gMan = guiMan;
+	devices->setControlMode(2, 5);
+	devices->setControlMode(3, 5);
 }
 
 void FRC::vacManager::vacuum()
 {	
-	CANJagCurrent1 = devices->getCANJagCurrent(1);
-	CANJagCurrent2 = devices->getCANJagCurrent(2);
+	CANJagCurrent1 = devices->getCANJagCurrent(2);
+	CANJagCurrent2 = devices->getCANJagCurrent(3);
 	
 	// debugging : print out both CANJaguar currents
 	gMan->print(4, "%d", CANJagCurrent1);
@@ -24,13 +26,25 @@ void FRC::vacManager::vacuum()
 		devices->setSolenoid(1, 1);
 		Wait(0.050);
 		devices->setSolenoid(1, 0);	
-			
-		// if fire button pressed, fire
-		if(inputMan->getButton(3))
-		{
-			// turn off vacuum temporarily
-			
-		}
 		
 	}
 }
+
+void FRC::vacManager::shoot()
+{
+	if(CANJagCurrent1 < currentThreshold)
+	{
+		// turn off vacuum temporarily
+		devices->setCANJag(2, 0);
+		devices->setCANJag(3, 0);
+		
+		Wait(0.050);
+		
+		devices->setCANJag(2, 1);
+		devices->setCANJag(3, 1);
+	}
+}
+
+
+// "Beware of bugs in the above code; I have only proved it correct, not tried it."
+// --Donald Knuth
