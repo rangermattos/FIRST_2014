@@ -11,12 +11,13 @@ namespace FRC
 	private:
 		FRC::deviceManager * devices;
 		FRC::guiManager * gMan;
-		int height;
+		float height;
 		
 	public:
 		elevManager( FRC::deviceManager * devMan, FRC::guiManager * guiMan );
 		void moveElevator( float direction, float speed );
-		int getHeight();
+		void moveArm( float direction, float speed );
+		float getHeight();
 		
 	};
 }

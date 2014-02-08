@@ -54,7 +54,7 @@ public:
         	while (IsAutonomous())
         	{
                 //myRobot.SetSafetyEnabled(false);
-        		//distance = A1.GetVoltage()*512/5;
+        		//distance = devices->getVoltage(3)*512/5;
         		if (distance < 48) // less than 48 inches / 4 feet
         		{
         			// backwards

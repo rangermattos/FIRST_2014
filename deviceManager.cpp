@@ -198,16 +198,16 @@ double FRC::deviceManager::PotPosition()
 	return armMotor->GetPosition();
 }
 
-int FRC::deviceManager::getAnalogValue( int analog )
+float FRC::deviceManager::getAnalogVoltage( int analog )
 {
 	switch(analog)
 	{
 	case 1:
-		return elevPotHeight.GetValue();
+		return elevPotHeight.GetVoltage();
 	case 2:
-		return gyro.GetValue();
+		return gyro.GetVoltage();
 	case 3:
-		return ultrasonic.GetValue();
+		return ultrasonic.GetVoltage();
 	default:
 		break;
 	}

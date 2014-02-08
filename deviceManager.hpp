@@ -43,7 +43,7 @@ namespace FRC
         	void setControlMode(int CanJag, int mode);
         	void setPositionReference(int CANJag, int reference);
         	double PotPosition();
-        	int getAnalogValue( int analog );
+        	float getAnalogVoltage( int analog );
         };
 }
 #endif // FRC2014_GUIMANAGER
