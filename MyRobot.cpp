@@ -95,11 +95,19 @@ public:
         	devices.setPositionReference(1, 2);
             while (IsOperatorControl())
             {
-            	//---------------------DRIVER CODE--------------------------------
+            	//----------START UP----------------------------------------------
+            	//----------------------------------------------------------------
+            	//----------------------------------------------------------------
+            	
+            	// Update InputManager
+            	inpMan.update();
+            	                
+            	
+            	//----------DRIVER CODE-------------------------------------------
             	//----------------------------------------------------------------
             	//----------------------------------------------------------------
                 
-            	//-------------------ARCADE TANK SWITCH------------------------
+            	//----------ARCADE TANK SWITCH------------------------------------
             	// xbox back button / joystick button 7 : switching drive modes
         		if (inpMan.getButton(7))
         		{
@@ -121,9 +129,10 @@ public:
         			IsArcade = !IsArcade;
         		}
         		
-        		//-----------------HIGH LOW SPEED SWITCHING--------------------------
-                //read and activate solenoids
-        		if (inpMan.getButton(6))	// toggle solenoids with x button / 3 button
+                
+        		//----------HIGH LOW SPEED SWITCHING------------------------------
+                // read and activate solenoids
+        		if (inpMan.getButton(6)) // toggle solenoids with x button / 3 button
         		{
         			while (inpMan.getButton(6))
         			{
@@ -149,17 +158,17 @@ public:
         			guiMan.print(0, "Speed Low");
         		}
         		
-                        
-                //Set Motor Commands
+        		//----------SET DRIVE MOTOR COMMANDS------------------------------        
                 devices.setSpeed(1, inpMan.getMotor(1));
                 devices.setSpeed(2, -inpMan.getMotor(2));
                 
-                //---------------------SHOOTER CODE-------------------------------
+                
+                //----------SHOOTER CODE------------------------------------------
                 //----------------------------------------------------------------
                 //----------------------------------------------------------------
                 
-                //---------------------MANAGE VACUUM SHOOTING---------------------
-                //---------------------button 3 shoots----------------------------
+                //----------MANAGE VACUUM SHOOTING--------------------------------
+                // button 3 shoots
                 vacMan.vacuum();
                 
                 if(inpMan.getButton(3))
@@ -169,21 +178,19 @@ public:
                 
                 
                 //---------------------COMPRESSOR ON/OFF--------------------------
-                                //Compressor On/Off
-                                if (drive->GetDigitalIn(1) == 1)
-                                {
-                                	guiMan.print(1, "Compressor On");
-                                	devices.startCompressor();
-                                }
-                                else if (drive->GetDigitalIn(1) == 0)
-                                {
-                                	guiMan.print(1, "Compressor Off");
-                                	devices.stopCompressor();
-                                }
+                // Compressor On/Off
+                if (drive->GetDigitalIn(1) == 1)
+                {
+                	guiMan.print(1, "Compressor On");
+                    devices.startCompressor();
+                }
+                else if (drive->GetDigitalIn(1) == 0)
+                {
+                   	guiMan.print(1, "Compressor Off");
+                   	devices.stopCompressor();
+                }
                                 
-                //Update InputManager
-                inpMan.update();
-                
+             
                 //------------------LCD PRINTS--------------------------------
                 //------------------------------------------------------------
                 //------------------------------------------------------------
