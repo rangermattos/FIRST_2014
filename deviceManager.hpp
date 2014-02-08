@@ -13,7 +13,7 @@ namespace FRC
         private:
         	Victor drivemotor1, drivemotor2, elevMotor1, elevMotor2;
         	AnalogChannel elevPotHeight, gyro, ultrasonic;
-        	DigitalInput elevhomeswitch;
+        	DigitalInput elevhomeswitch, armhomeswitch;
         	Compressor compressor;
         	Solenoid armfire, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
         	bool pistonExtended;

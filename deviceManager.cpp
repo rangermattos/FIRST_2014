@@ -1,14 +1,15 @@
 #include "deviceManager.hpp"
 #include <iostream>
 FRC::deviceManager::deviceManager() :
-	elevMotor1(1),
-	elevMotor2(2),
 	drivemotor1(1),
 	drivemotor2(2),
+	elevMotor1(3),
+	elevMotor2(4),
 	elevPotHeight(1),
 	gyro(2),
 	ultrasonic(3),
 	elevhomeswitch(2),
+	armhomeswitch(3),
 	compressor(1,1),
 	armfire(1),
 	lowsp(2),
