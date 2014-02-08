@@ -1,5 +1,7 @@
 #include "inputManager.hpp"
 #include <iostream>
+#include <cmath>
+
 FRC::inputManager::inputManager(float threshold, unsigned char mode) :
 	m1(0),
 	m2(0),
@@ -31,6 +33,21 @@ inline float threshold(const float & val, const float & thresh)
 	else
 		return val;
 }
+
+float FRC::inputManager::rateLimit( float newVal, float prevVal, float rate )
+{
+	float out;
+	float delta = fabs(newVal - prevVal);
+	float sign = (newVal > prevVal) ? 1 : -1;
+	
+	if(delta > rate)
+		out = prevVal + sign * rate;
+	else
+		out = newVal;
+	
+	return out;
+}
+
 void FRC::inputManager::update()
 {
 	switch(driveMode)

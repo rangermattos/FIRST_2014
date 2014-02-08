@@ -33,6 +33,7 @@ namespace FRC
 			///@brief locks in new values, and thresholds the value
 			void update();
 			
+			float rateLimit( float current, float prev, float rate );
 			///@brief returns current drive mode
 			unsigned char getMode();
 			///@brief allows swapping of modes while running, or during configuration
