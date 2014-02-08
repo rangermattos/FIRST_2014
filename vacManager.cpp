@@ -1,9 +1,8 @@
 #include "vacManager.hpp"
 
-FRC::vacManager::vacManager(FRC::inputManager * inpMan, FRC::deviceManager * devMan, FRC::guiManager * guiMan) :
+FRC::vacManager::vacManager( FRC::deviceManager * devMan, FRC::guiManager * guiMan ) :
 	currentThreshold(25.0)
 {
-	inputMan = inpMan;
 	devices = devMan;
 	gMan = guiMan;
 	devices->setControlMode(2, 5);

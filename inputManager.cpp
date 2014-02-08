@@ -61,8 +61,6 @@ void FRC::inputManager::update()
 		m2 = val;
 	}
 
-
-
 }
 	
 float FRC::inputManager::getMotor(int motor)

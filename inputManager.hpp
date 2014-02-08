@@ -32,6 +32,7 @@ namespace FRC
 			inputManager(float threshold = 0.1f, unsigned char mode = MODE_JOY_TANK);
 			///@brief locks in new values, and thresholds the value
 			void update();
+			
 			///@brief returns current drive mode
 			unsigned char getMode();
 			///@brief allows swapping of modes while running, or during configuration

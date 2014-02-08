@@ -1,11 +1,11 @@
 #include "deviceManager.hpp"
 #include <iostream>
 FRC::deviceManager::deviceManager() :
-	elevmotor1(1),
-	elevmotor2(2),
+	elevMotor1(1),
+	elevMotor2(2),
 	drivemotor1(1),
 	drivemotor2(2),
-	elevpotheight(1),
+	elevPotHeight(1),
 	gyro(2),
 	ultrasonic(3),
 	elevhomeswitch(2),
@@ -31,6 +31,12 @@ void FRC::deviceManager::setSpeed(int motor, float speed)
 		break;
 	case 2:
 		drivemotor2.Set(speed);
+		break;
+	case 3:
+		elevMotor1.Set(speed);
+		break;
+	case 4:
+		elevMotor2.Set(speed);
 		break;
 	}
 }
@@ -189,5 +195,20 @@ void FRC::deviceManager::setPositionReference(int CANJag, int reference)
 double FRC::deviceManager::PotPosition()
 {
 	return armMotor->GetPosition();
+}
+
+int FRC::deviceManager::getAnalogValue( int analog )
+{
+	switch(analog)
+	{
+	case 1:
+		return elevPotHeight.GetValue();
+	case 2:
+		return gyro.GetValue();
+	case 3:
+		return ultrasonic.GetValue();
+	default:
+		break;
+	}
 }
 

@@ -4,6 +4,7 @@
 #include "deviceManager.hpp"
 #include "guiManager.hpp"
 #include "vacManager.hpp"
+#include "elevManager.hpp"
 //#include "netManager.hpp"
 /**
  * This is a demo program showing the use of the RobotBase class.
@@ -17,6 +18,7 @@ class RobotDemo : public SimpleRobot
 	FRC::deviceManager devices;
 	FRC::guiManager guiMan;
 	FRC::vacManager vacMan;
+	FRC::elevManager elevMan;
 	float distance;
 	float speed;
 	bool IsArcade, prevArcade;
@@ -35,7 +37,8 @@ public:
 		drive(DriverStation::GetInstance()),
 		//display(DriverStationLCD::GetInstance())
 		//netMan(&guiMan)
-		vacMan(&inpMan, &devices, &guiMan)
+		vacMan(&devices, &guiMan),
+		elevMan(&devices, &guiMan)
 		{
 			//myRobot.SetExpiration(0.1);
 			//devices.startEncoder();

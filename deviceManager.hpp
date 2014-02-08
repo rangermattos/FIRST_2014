@@ -11,9 +11,8 @@ namespace FRC
         class deviceManager 
         {
         private:
-        	Talon elevmotor1, elevmotor2;
-        	Victor drivemotor1, drivemotor2;
-        	AnalogChannel elevpotheight, gyro, ultrasonic;
+        	Victor drivemotor1, drivemotor2, elevMotor1, elevMotor2;
+        	AnalogChannel elevPotHeight, gyro, ultrasonic;
         	DigitalInput elevhomeswitch;
         	Compressor compressor;
         	Solenoid armfire, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
@@ -44,6 +43,7 @@ namespace FRC
         	void setControlMode(int CanJag, int mode);
         	void setPositionReference(int CANJag, int reference);
         	double PotPosition();
+        	int getAnalogValue( int analog );
         };
 }
 #endif // FRC2014_GUIMANAGER
