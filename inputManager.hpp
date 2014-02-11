@@ -14,7 +14,7 @@ namespace FRC
 		private:
 			float m1, m2;
 			unsigned char driveMode;
-			Joystick s1, s2;
+			Joystick s1, s2, s3;
 			float thresh;
 			DriverStationEnhancedIO *enhancedIO;
         public:
@@ -42,8 +42,13 @@ namespace FRC
 			float getMotor(int motor);
 			///@brief get the z-axis data off of the primary joystick
 			float getZ(void);
+			///@brief
+			float getElevAxis(void);
+			///@brief
+			float getArmAxis(void);
 			///@brief get joystick button status
 			bool getButton(int button);
+
 			
 			// add enhancedIO methods later
 	};

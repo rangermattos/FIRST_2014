@@ -19,10 +19,11 @@ class RobotDemo : public SimpleRobot
 	FRC::guiManager guiMan;
 	FRC::vacManager vacMan;
 	FRC::elevManager elevMan;
+	DriverStation *drive;
 	float distance;
 	float speed;
 	bool IsArcade, prevArcade;
-	DriverStation *drive;
+	
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
 	//netManager netMan;
@@ -94,7 +95,7 @@ public:
         void OperatorControl()
         {
             //myRobot.SetSafetyEnabled(false);
-        	int i = 0;
+        	//int i = 0;
         	devices.setPositionReference(1, 2);
             while (IsOperatorControl())
             {
@@ -112,7 +113,7 @@ public:
                 
             	//----------ARCADE TANK SWITCH------------------------------------
             	// xbox back button / joystick button 7 : switching drive modes
-        		if (inpMan.getButton(7))
+        		/*if (inpMan.getButton(7))
         		{
         			while (inpMan.getButton(7))
         			{
@@ -130,7 +131,7 @@ public:
         			}
         			prevArcade = IsArcade;
         			IsArcade = !IsArcade;
-        		}
+        		}*/
         		
                 
         		//----------HIGH LOW SPEED SWITCHING------------------------------
@@ -172,12 +173,15 @@ public:
                 
                 //----------MANAGE VACUUM SHOOTING--------------------------------
                 // button 3 shoots
-                vacMan.vacuum();
+                /*vacMan.vacuum();
                 
                 if(inpMan.getButton(3))
                 {
                 	vacMan.shoot();
-                }
+                } */
+                
+                elevMan.moveArm(inpMan.getArmAxis());
+                elevMan.moveElevator(inpMan.getElevAxis());
                 
                 
                 //---------------------COMPRESSOR ON/OFF--------------------------
@@ -201,12 +205,14 @@ public:
                 //------------------GUI PRINTS FOR DRIVER----------------------
                 guiMan.print(2, "Left Motor = %f", -inpMan.getMotor(1));
                 guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
-                guiMan.print(4, "Potentiometer = %f", devices.PotPosition());
+                guiMan.print(4, "Elev Axis = %f", inpMan.getElevAxis());
+                guiMan.print(5, "Arm Axis = %f", inpMan.getArmAxis());
+                //guiMan.print(4, "Arm Pot = %f", devices.PotPosition());
                 
                 //-----------------UPDATES THE LCD--------------------
                 // Update Driver Station LCD Display
                 guiMan.update();
-                printf("counter = %i\n", i++);
+                //printf("counter = %i\n", i++);
                 Wait(0.005); // wait for a motor update time
                         
                }

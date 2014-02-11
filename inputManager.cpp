@@ -5,8 +5,9 @@
 FRC::inputManager::inputManager(float threshold, unsigned char mode) :
 	m1(0),
 	m2(0),
-	s1(1),
-	s2(2)
+	s1(1), // xbox
+	s2(2), // xbox
+	s3(3) //joystick
 {
 	thresh = threshold;
 	setMode(mode);
@@ -62,8 +63,8 @@ void FRC::inputManager::update()
         	m2 = threshold(clamp(-1.0f, 1.0f, s1.GetY() - s1.GetX()), thresh);
         	break;
         case MODE_XBOX_TANK:
-        	m2 = threshold(s1.GetY() / 2.0f, thresh);
-        	m1 = threshold(s1.GetRawAxis(5) / 2.0f, thresh);
+        	m2 = threshold(s1.GetY() / 1.0f, thresh);
+        	m1 = threshold(s1.GetRawAxis(5) / 1.0f, thresh);
         	break;
         case MODE_XBOX_ARCADE:
         	m1 = threshold(clamp(-1.0f, 1.0f, s1.GetY() + s1.GetX()), thresh);
@@ -98,7 +99,18 @@ float FRC::inputManager::getMotor(int motor)
 float FRC::inputManager::getZ(void)
 {
 	// used to get value of z axis for logitech joystick
-	 return s1.GetZ();
+	return s2.GetZ();
+}
+
+float FRC::inputManager::getElevAxis(void)
+{
+	// return threshold(s2.GetX(), thresh)
+	return s2.GetX();
+}
+
+float FRC::inputManager::getArmAxis(void)
+{
+	return s2.GetY();
 }
 
 bool FRC::inputManager::getButton(int button)

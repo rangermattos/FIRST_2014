@@ -15,8 +15,8 @@ namespace FRC
 		
 	public:
 		elevManager( FRC::deviceManager * devMan, FRC::guiManager * guiMan );
-		void moveElevator( float direction, float speed );
-		void moveArm( float direction, float speed );
+		void moveElevator( float speed );
+		void moveArm( float speed );
 		float getHeight();
 		
 	};
