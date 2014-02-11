@@ -44,6 +44,13 @@ namespace FRC
         	void setPositionReference(int CANJag, int reference);
         	double PotPosition();
         	float getAnalogVoltage( int analog );
+        	float drivemotor1Control(float speed);
+        	float drivemotor2Control(float speed);
+        	float elevMotor1Control(float speed);
+        	float elevMotor2Control(float speed);
+        	float vacMotor1Control(float speed);
+        	float vacMotor2Control(float speed);
+        	float armMotorControl(float speed);
         };
 }
 #endif // FRC2014_GUIMANAGER

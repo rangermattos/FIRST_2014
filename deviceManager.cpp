@@ -140,7 +140,7 @@ void FRC::deviceManager::setControlMode(int CANJag, int mode)
 			armMotor->ChangeControlMode(CANJaguar::kVoltage);
 		break;
 	case 2:
-		if(mode == 2)
+		if(mode == 1)
 			vacMotor1->ChangeControlMode(CANJaguar::kPercentVbus);
 		else if(mode == 2)
 			vacMotor1->ChangeControlMode(CANJaguar::kCurrent);
@@ -152,7 +152,7 @@ void FRC::deviceManager::setControlMode(int CANJag, int mode)
 			vacMotor1->ChangeControlMode(CANJaguar::kVoltage);
 		break;
 	case 3:
-		if(mode == 3)
+		if(mode == 1)
 			vacMotor2->ChangeControlMode(CANJaguar::kPercentVbus);
 		else if(mode == 2)
 			vacMotor2->ChangeControlMode(CANJaguar::kCurrent);
@@ -213,3 +213,37 @@ float FRC::deviceManager::getAnalogVoltage( int analog )
 	}
 }
 
+float FRC::deviceManager::drivemotor1Control(float speed)
+{
+	drivemotor1.SetSpeed(speed);
+}
+
+float FRC::deviceManager::drivemotor2Control(float speed)
+{
+	drivemotor2.SetSpeed(speed);
+}
+
+float FRC::deviceManager::elevMotor1Control(float speed)
+{
+	elevMotor1.SetSpeed(speed);
+}
+
+float FRC::deviceManager::elevMotor2Control(float speed)
+{
+	elevMotor2.SetSpeed(speed);
+}
+
+float FRC::deviceManager::vacMotor1Control(float speed)
+{
+	vacMotor1->Set(speed, 0);
+}
+
+float FRC::deviceManager::vacMotor2Control(float speed)
+{
+	vacMotor2->Set(speed, 0);
+}
+
+float FRC::deviceManager::armMotorControl(float speed)
+{
+	armMotor->Set(speed, 0);
+}
