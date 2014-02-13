@@ -38,6 +38,7 @@ void FRC::elevManager::moveElevator( float speed )
 
 void FRC::elevManager::moveArm( float speed )
 {	
+	height = devices->getAnalogVoltage(4);
 	float direction = (speed >= 0) ? 1 : -1;
 	//if(height >= MIN_HEIGHT && height <= MAX_HEIGHT)
 	//{

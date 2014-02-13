@@ -105,12 +105,12 @@ float FRC::inputManager::getZ(void)
 float FRC::inputManager::getElevAxis(void)
 {
 	// return threshold(s2.GetX(), thresh)
-	return s2.GetX();
+	return s2.GetY();
 }
 
 float FRC::inputManager::getArmAxis(void)
 {
-	return s2.GetY();
+	return s2.GetRawAxis(6);
 }
 
 bool FRC::inputManager::getButton(int button)
