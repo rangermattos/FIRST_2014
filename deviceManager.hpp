@@ -51,6 +51,7 @@ namespace FRC
         	float vacMotor1Control(float speed);
         	float vacMotor2Control(float speed);
         	float armMotorControl(float speed);
+        	int getHomeSwitch(int location);
         };
 }
 #endif // FRC2014_GUIMANAGER

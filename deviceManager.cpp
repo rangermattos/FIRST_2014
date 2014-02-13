@@ -247,3 +247,16 @@ float FRC::deviceManager::armMotorControl(float speed)
 {
 	armMotor->Set(speed, 0);
 }
+
+int FRC::deviceManager::getHomeSwitch(int location)
+{
+	switch(location)
+	{
+	case 1:
+		return elevhomeswitch.Get();
+	case 2:
+		return armhomeswitch.Get();
+	default:
+		break;
+	}
+}
