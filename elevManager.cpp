@@ -1,5 +1,5 @@
 #include "elevManager.hpp"
-#define MAX_HEIGHT 1.0
+#define MAX_HEIGHT 5.0
 #define MIN_HEIGHT 0.0
 
 FRC::elevManager::elevManager( FRC::deviceManager * devMan, FRC::guiManager * guiMan )
@@ -27,7 +27,7 @@ void FRC::elevManager::moveElevator( float speed )
 	}
 	else if(direction < 0)
 	{
-		if(height >= MIN_HEIGHT || devices->getHomeSwitch(1) == 1)
+		if(height >= MIN_HEIGHT || devices->getHomeSwitch(1) == 0)
 		{
 			devices->setSpeed(3, speed);
 			devices->setSpeed(4, speed);
@@ -51,9 +51,9 @@ void FRC::elevManager::moveArm( float speed )
 	}
 	else if(direction < 0)
 	{
-		if(height >= MIN_HEIGHT || devices->getHomeSwitch(2) == 1)
+		if(height >= MIN_HEIGHT || devices->getHomeSwitch(2) == 0)
 		{
-			devices->setCANJag(1, -speed);
+			devices->setCANJag(1, speed);
 		}
 	}
 }

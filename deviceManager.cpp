@@ -8,6 +8,7 @@ FRC::deviceManager::deviceManager() :
 	elevPotHeight(1),
 	gyro(2),
 	ultrasonic(3),
+	armPotHeight(4),
 	elevhomeswitch(2),
 	armhomeswitch(3),
 	compressor(1,1),
@@ -198,6 +199,7 @@ double FRC::deviceManager::PotPosition()
 	return armMotor->GetPosition();
 }
 
+
 float FRC::deviceManager::getAnalogVoltage( int analog )
 {
 	switch(analog)
@@ -208,6 +210,8 @@ float FRC::deviceManager::getAnalogVoltage( int analog )
 		return gyro.GetVoltage();
 	case 3:
 		return ultrasonic.GetVoltage();
+	case 4:
+		return armPotHeight.GetVoltage();
 	default:
 		break;
 	}

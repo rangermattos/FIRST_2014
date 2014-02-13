@@ -185,7 +185,7 @@ public:
                 	vacMan.shoot();
                 } */
                 
-                elevMan.moveArm(inpMan.getArmAxis());
+                elevMan.moveArm(-inpMan.getArmAxis());
                 elevMan.moveElevator(inpMan.getElevAxis());
                 
                 
@@ -208,11 +208,14 @@ public:
                 //------------------------------------------------------------
                 
                 //------------------GUI PRINTS FOR DRIVER----------------------
-                guiMan.print(2, "Left Motor = %f", -inpMan.getMotor(1));
-                guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
-                guiMan.print(4, "Elev Axis = %f", inpMan.getElevAxis());
-                guiMan.print(5, "Arm Axis = %f", inpMan.getArmAxis());
-                //guiMan.print(4, "Arm Pot = %f", devices.PotPosition());
+                //guiMan.print(2, "Left Motor = %f", -inpMan.getMotor(1));
+                //guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
+                //guiMan.print(4, "Elev Axis = %f", inpMan.getElevAxis());
+                //guiMan.print(5, "Arm Axis = %f", inpMan.getArmAxis());
+                guiMan.print(2, "Elev Pot = %f", devices.getAnalogVoltage(1));
+                guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(4));
+                guiMan.print(4, "Elev Home = %d", devices.getHomeSwitch(1)); //if d doesn't work try i
+                guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch(2));
                 
                 //-----------------UPDATES THE LCD--------------------
                 // Update Driver Station LCD Display
