@@ -113,7 +113,7 @@ float FRC::inputManager::getArmAxis(void)
 	return s2.GetRawAxis(6);
 }
 
-bool FRC::inputManager::getButton(int button)
+bool FRC::inputManager::getButton(int joystick, int button)
 {
 	/*
 	* logitech joystick buttons match indicators
@@ -126,10 +126,21 @@ bool FRC::inputManager::getButton(int button)
 	* xbox button7 = back
 	* xbox button8 = start
 	*/
-	 return s1.GetRawButton(button);
+	switch(joystick)
+	{
+	case 1:
+		return s1.GetRawButton(button);
+		break;
+	case 2:
+		return s2.GetRawButton(button);
+		break;
+	default:
+		return false;
+	}
+		
 }
 
-float FRC::inputManager::getAxis(int axis)
+float FRC::inputManager::getAxis(int joystick, int axis)
 {
 	/*
 	 * axis 1 = left, right
@@ -140,7 +151,18 @@ float FRC::inputManager::getAxis(int axis)
 	 * axis 6 = top -1 foward, 1 back
 	 * xbox axis 3 = triggers
 	 */
-	return s1.GetRawAxis(axis);
+	//return s1.GetRawAxis(axis);
+	switch(joystick)
+	{
+	case 1:
+		return s1.GetRawAxis(axis);
+		break;
+	case 2:
+		return s2.GetRawAxis(axis);
+		break;
+	default:
+		return 0.0f;
+	}
 }
 
 float FRC::inputManager::Joystick1(void)

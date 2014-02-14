@@ -96,7 +96,13 @@ public:
         {
             //myRobot.SetSafetyEnabled(false);
         	//int i = 0;
+        	// Set shifter to low
+			devices.setSolenoid(2, true);
+			devices.setSolenoid(3, false);
+			guiMan.print(0, "Speed Low");
+			
         	devices.setPositionReference(1, 2);
+        	
             while (IsOperatorControl())
             {
             	//----------START UP----------------------------------------------
@@ -141,9 +147,9 @@ public:
                 
         		//----------HIGH LOW SPEED SWITCHING------------------------------
                 // read and activate solenoids
-        		if (inpMan.getButton(6)) // toggle solenoids with x button / 3 button
+        		if (inpMan.getButton(1, 6)) // toggle solenoids with x button / 3 button
         		{
-        			while (inpMan.getButton(6))
+        			while (inpMan.getButton(1, 6))
         			{
         				if (!devices.isPistonExtended())
         				{
@@ -160,12 +166,6 @@ public:
         			}
     				devices.togglePistonExtended();
         		}
-        		else
-        		{
-        			devices.setSolenoid(2, true);
-        			devices.setSolenoid(3, false);
-        			guiMan.print(0, "Speed Low");
-        		}
         		
         		//----------SET DRIVE MOTOR COMMANDS------------------------------        
                 devices.setSpeed(1, inpMan.getMotor(1));
@@ -176,20 +176,21 @@ public:
                 //----------------------------------------------------------------
                 //----------------------------------------------------------------
                 
-                //----------MANAGE VACUUM SHOOTING--------------------------------
-                // button 3 shoots
-                /*vacMan.vacuum();
-                
-                if(inpMan.getButton(3))
-                {
-                	vacMan.shoot();
-                } */
-                
+                //----------ARM CONTROL-------------------------------------------
                 elevMan.moveArm(-inpMan.getArmAxis());
                 elevMan.moveElevator(inpMan.getElevAxis());
                 
+                //----------MANAGE VACUUM SHOOTING--------------------------------
+                // button 3 shoots
+                vacMan.vacuum();
                 
-                //---------------------COMPRESSOR ON/OFF--------------------------
+                if(inpMan.getButton(2, 1))
+                {
+                	vacMan.shoot();
+                }
+                                
+                
+                //------------------COMPRESSOR ON/OFF--------------------------
                 // Compressor On/Off
                 if (drive->GetDigitalIn(1) == 1)
                 {
@@ -207,17 +208,17 @@ public:
                 //------------------------------------------------------------
                 //------------------------------------------------------------
                 
-                //------------------GUI PRINTS FOR DRIVER----------------------
+                //------------------GUI PRINTS FOR DRIVER---------------------
                 //guiMan.print(2, "Left Motor = %f", -inpMan.getMotor(1));
                 //guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
-                //guiMan.print(4, "Elev Axis = %f", inpMan.getElevAxis());
-                //guiMan.print(5, "Arm Axis = %f", inpMan.getArmAxis());
+                //guiMan.print(2, "Elev Axis = %f", inpMan.getElevAxis());
+                //guiMan.print(3, "Arm Axis = %f", inpMan.getArmAxis());
                 guiMan.print(2, "Elev Pot = %f", devices.getAnalogVoltage(1));
                 guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(4));
-                guiMan.print(4, "Elev Home = %d", devices.getHomeSwitch(1)); //if d doesn't work try i
-                guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch(2));
+                //guiMan.print(4, "Elev Home = %d", devices.getHomeSwitch(1)); //if d doesn't work try i
+                //guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch(2));
                 
-                //-----------------UPDATES THE LCD--------------------
+                //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display
                 guiMan.update();
                 //printf("counter = %i\n", i++);
@@ -235,9 +236,9 @@ public:
         	
         	while (IsTest())
         	{
-        		devices.setControlMode(1 ,1);
-        		devices.setControlMode(2 ,1);
-        		devices.setControlMode(3 ,1);
+        		devices.setControlMode(1, 1);
+        		devices.setControlMode(2, 1);
+        		devices.setControlMode(3, 1);
         		devices.drivemotor1Control(inpMan.Joystick2());
         		devices.drivemotor2Control(inpMan.Joystick1());
         		devices.elevMotor1Control(inpMan.Joystick3());

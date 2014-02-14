@@ -47,8 +47,8 @@ namespace FRC
 			///@brief
 			float getArmAxis(void);
 			///@brief get joystick button status
-			bool getButton(int button);
-			float getAxis(int axis);
+			bool getButton(int joystick, int button);
+			float getAxis(int joystick, int axis);
         	float Joystick1(void);
         	float Joystick2(void);
         	float Joystick3(void);

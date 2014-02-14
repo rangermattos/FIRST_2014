@@ -27,7 +27,7 @@ void FRC::elevManager::moveElevator( float speed )
 	}
 	else if(direction < 0)
 	{
-		if(height >= MIN_HEIGHT || devices->getHomeSwitch(1) == 0)
+		if(height >= MIN_HEIGHT && devices->getHomeSwitch(1) == 1)
 		{
 			devices->setSpeed(3, speed);
 			devices->setSpeed(4, speed);
@@ -51,7 +51,7 @@ void FRC::elevManager::moveArm( float speed )
 	}
 	else if(direction < 0)
 	{
-		if(height >= MIN_HEIGHT || devices->getHomeSwitch(2) == 0)
+		if(height >= MIN_HEIGHT && devices->getHomeSwitch(2) == 1)
 		{
 			devices->setCANJag(1, speed);
 		}
