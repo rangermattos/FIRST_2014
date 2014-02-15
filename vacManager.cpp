@@ -10,6 +10,7 @@ FRC::vacManager::vacManager( FRC::deviceManager * devMan, FRC::guiManager * guiM
 }
 
 void FRC::vacManager::vacuum()
+//Use the CANJaguar current to tell if the ball can be fired.
 {	
 	CANJagCurrent1 = devices->getCANJagCurrent(2);
 	CANJagCurrent2 = devices->getCANJagCurrent(3);
@@ -30,6 +31,7 @@ void FRC::vacManager::vacuum()
 }
 
 void FRC::vacManager::shoot()
+//turns off the vacuum to fire.
 {
 	if(CANJagCurrent1 < currentThreshold)
 	{

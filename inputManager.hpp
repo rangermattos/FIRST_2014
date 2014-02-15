@@ -49,13 +49,6 @@ namespace FRC
 			///@brief get joystick button status
 			bool getButton(int joystick, int button);
 			float getAxis(int joystick, int axis);
-        	float Joystick1(void);
-        	float Joystick2(void);
-        	float Joystick3(void);
-        	float Joystick4(void);
-        	float Joystick5(void);
-        	float Joystick6(void);
-        	float Joystick7(void);
 			
 			// add enhancedIO methods later
 	};

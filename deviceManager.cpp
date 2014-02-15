@@ -3,13 +3,9 @@
 FRC::deviceManager::deviceManager() :
 	drivemotor1(1),
 	drivemotor2(2),
-	elevMotor1(3),
-	elevMotor2(4),
-	elevPotHeight(1),
 	gyro(2),
 	ultrasonic(3),
 	armPotHeight(4),
-	elevhomeswitch(2),
 	armhomeswitch(3),
 	compressor(1,1),
 	armfire(1),
@@ -25,6 +21,7 @@ FRC::deviceManager::deviceManager() :
 }
 
 void FRC::deviceManager::setSpeed(int motor, float speed)
+//choose drive motor and sets the speed.
 {
 	switch(motor)
 	{
@@ -34,16 +31,11 @@ void FRC::deviceManager::setSpeed(int motor, float speed)
 	case 2:
 		drivemotor2.Set(speed);
 		break;
-	case 3:
-		elevMotor1.Set(speed);
-		break;
-	case 4:
-		elevMotor2.Set(speed);
-		break;
 	}
 }
 
 void FRC::deviceManager::setSolenoid(int sol, bool set)
+//choose the solenoid and decide if it is true of false.
 {
 	switch(sol)
 	{
@@ -94,6 +86,7 @@ void FRC::deviceManager::stopCompressor()
 }
 
 float FRC::deviceManager::getCANJagCurrent(int CANJag)
+//gets the current of the CANJaguar motors.
 {
 	switch(CANJag)
 	{
@@ -109,6 +102,7 @@ float FRC::deviceManager::getCANJagCurrent(int CANJag)
 }
 
 void FRC::deviceManager::setCANJag(int CANJag, float value)
+//Used to set the speed of the CANJaguars.
 {
 	switch(CANJag)
 	{
@@ -125,6 +119,7 @@ void FRC::deviceManager::setCANJag(int CANJag, float value)
 }
 
 void FRC::deviceManager::setControlMode(int CANJag, int mode)
+//Changes the control mode of each CANJaguar.
 {
 	switch(CANJag)
 	{
@@ -201,14 +196,13 @@ double FRC::deviceManager::PotPosition()
 
 
 float FRC::deviceManager::getAnalogVoltage( int analog )
+//Chooses which analog voltage to display
 {
 	switch(analog)
 	{
 	case 1:
-		return elevPotHeight.GetVoltage();
-	case 2:
 		return gyro.GetVoltage();
-	case 3:
+	case 2:
 		return ultrasonic.GetVoltage();
 	case 4:
 		return armPotHeight.GetVoltage();
@@ -227,16 +221,6 @@ float FRC::deviceManager::drivemotor2Control(float speed)
 	drivemotor2.SetSpeed(speed);
 }
 
-float FRC::deviceManager::elevMotor1Control(float speed)
-{
-	elevMotor1.SetSpeed(speed);
-}
-
-float FRC::deviceManager::elevMotor2Control(float speed)
-{
-	elevMotor2.SetSpeed(speed);
-}
-
 float FRC::deviceManager::vacMotor1Control(float speed)
 {
 	vacMotor1->Set(speed, 0);
@@ -252,15 +236,7 @@ float FRC::deviceManager::armMotorControl(float speed)
 	armMotor->Set(speed, 0);
 }
 
-int FRC::deviceManager::getHomeSwitch(int location)
+int FRC::deviceManager::getHomeSwitch(void)
 {
-	switch(location)
-	{
-	case 1:
-		return elevhomeswitch.Get();
-	case 2:
 		return armhomeswitch.Get();
-	default:
-		break;
-	}
 }

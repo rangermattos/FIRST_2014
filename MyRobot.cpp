@@ -81,10 +81,6 @@ public:
         			devices.setSpeed(1, speed);
         			devices.setSpeed(2, speed);
         		}
-        		// print distance and speed
-        		//display->PrintfLine(DriverStationLCD::kUser_Line1, "distance = %f", distance);
-        		//display->PrintfLine(DriverStationLCD::kUser_Line2, "speed = %f", speed);
-        		//display->UpdateLCD();
         		Wait(0.005); // wait for a motor update time
         	}
         }
@@ -118,9 +114,7 @@ public:
             	//----------------------------------------------------------------
             	
             	//---------------Jaguar Mode--------------------------------------
-        		devices.setControlMode(1 ,1);
-        		devices.setControlMode(2 ,1);
-        		devices.setControlMode(3 ,1);
+        		devices.setControlMode(1 ,1);//set the CANJaguar to speed mode.
                 
             	//----------ARCADE TANK SWITCH------------------------------------
             	// xbox back button / joystick button 7 : switching drive modes
@@ -146,7 +140,7 @@ public:
         		
                 
         		//----------HIGH LOW SPEED SWITCHING------------------------------
-                // read and activate solenoids
+                // read and activate solenoids for the speed shifter.
         		if (inpMan.getButton(1, 6)) // toggle solenoids with x button / 3 button
         		{
         			while (inpMan.getButton(1, 6))
@@ -177,17 +171,17 @@ public:
                 //----------------------------------------------------------------
                 
                 //----------ARM CONTROL-------------------------------------------
-                elevMan.moveArm(-inpMan.getArmAxis());
-                elevMan.moveElevator(inpMan.getElevAxis());
+                elevMan.moveArm(-inpMan.getAxis(2, 6));
                 
                 //----------MANAGE VACUUM SHOOTING--------------------------------
                 // button 3 shoots
-                vacMan.vacuum();
+                //vacMan.vacuum();
                 
-                if(inpMan.getButton(2, 1))
-                {
-                	vacMan.shoot();
-                }
+                //if(inpMan.getButton(2, 1))
+                //{
+                	//vacMan.shoot();
+                //}
+                
                                 
                 
                 //------------------COMPRESSOR ON/OFF--------------------------
@@ -213,8 +207,7 @@ public:
                 //guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
                 //guiMan.print(2, "Elev Axis = %f", inpMan.getElevAxis());
                 //guiMan.print(3, "Arm Axis = %f", inpMan.getArmAxis());
-                guiMan.print(2, "Elev Pot = %f", devices.getAnalogVoltage(1));
-                guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(4));
+                guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(3));
                 //guiMan.print(4, "Elev Home = %d", devices.getHomeSwitch(1)); //if d doesn't work try i
                 //guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch(2));
                 
@@ -236,23 +229,56 @@ public:
         	
         	while (IsTest())
         	{
-        		devices.setControlMode(1, 1);
-        		devices.setControlMode(2, 1);
-        		devices.setControlMode(3, 1);
-        		devices.drivemotor1Control(inpMan.Joystick2());
-        		devices.drivemotor2Control(inpMan.Joystick1());
-        		devices.elevMotor1Control(inpMan.Joystick3());
-        		devices.elevMotor2Control(inpMan.Joystick4());
-        		devices.vacMotor1Control(inpMan.Joystick5());
-        		devices.vacMotor2Control(inpMan.Joystick6());
-        		devices.armMotorControl(inpMan.Joystick7());
-        		guiMan.print(0, "X Axis VM 1 = %f", inpMan.Joystick5());
-        		guiMan.print(1, "Y Axis VM 2 = %f", inpMan.Joystick6());
-        		guiMan.print(2, "X Axis AM 1 = %f", inpMan.Joystick7());
-        		//guiMan.print(0, "X Axis DM 1 = %f", inpMan.Joystick2());
-        		//guiMan.print(1, "Y Axis DM 2 = %f", inpMan.Joystick1()); 
-        		//guiMan.print(2, "X Axis EM 1 = %f", inpMan.Joystick3());
-        		//guiMan.print(3, "Y Axis EM 2 = %f", inpMan.Joystick4()); 
+        		if (inpMan.getButton(1, 6)) // toggle solenoids for shifters with RB button / 6 button
+        		{
+        			while (inpMan.getButton(1, 6))
+        		{
+        			if (!devices.isPistonExtended())
+        		    {
+        				devices.setSolenoid(2, true);
+        				devices.setSolenoid(3, false);
+        		        guiMan.print(0, "Speed Low");
+        		    }
+        			else
+        		    {
+        				devices.setSolenoid(2, false);
+        		        devices.setSolenoid(3, true);
+        		        guiMan.print(0, "Speed High");
+        		     }
+        		 }
+        		 devices.togglePistonExtended();
+        	}
+                if (drive->GetDigitalIn(1) == 1)// starts the compressor using digital input one on the drivers station.
+                {
+                	guiMan.print(1, "Compressor On");
+                    devices.startCompressor();
+                }
+                else if (drive->GetDigitalIn(1) == 0)// turns the compressor off using digital input one on the drivers station.
+                {
+                   	guiMan.print(1, "Compressor Off");
+                   	devices.stopCompressor();
+                }
+        		devices.setControlMode(1, 1);// changes the control mode of the CANJaguar to speed control mode.
+        		if (inpMan.getButton(2, 5) == 1)// Starts the vaccuum when button five (LB) is pressed.
+        		{
+        			devices.setCANJag(2, 1);
+        			devices.setCANJag(3, 1);
+        		}
+        		else
+        		{
+        			devices.setCANJag(2, 0);
+        			devices.setCANJag(3, 0);
+        		}
+        		if (inpMan.getButton(2, 6) == 1)//extends the firing piston when button six is pressed on the shooting joystick.
+        		{
+        			devices.setSolenoid(1, 1);
+        		}
+        		else
+        		{
+        			devices.setSolenoid(1, 0);
+        		}
+        		guiMan.print(2, "Vac Current = %f", devices.getCANJagCurrent(2));
+        		guiMan.print(3, "Firing Solenoid = %d", inpMan.getButton(2, 6));
                 guiMan.update();
         	}
         }

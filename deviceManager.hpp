@@ -11,9 +11,9 @@ namespace FRC
         class deviceManager 
         {
         private:
-        	Victor drivemotor1, drivemotor2, elevMotor1, elevMotor2;
-        	AnalogChannel elevPotHeight, gyro, ultrasonic, armPotHeight;
-        	DigitalInput elevhomeswitch, armhomeswitch;
+        	Victor drivemotor1, drivemotor2;
+        	AnalogChannel gyro, ultrasonic, armPotHeight;
+        	DigitalInput armhomeswitch;
         	Compressor compressor;
         	Solenoid armfire, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
         	bool pistonExtended;
@@ -46,12 +46,10 @@ namespace FRC
         	float getAnalogVoltage( int analog );
         	float drivemotor1Control(float speed);
         	float drivemotor2Control(float speed);
-        	float elevMotor1Control(float speed);
-        	float elevMotor2Control(float speed);
         	float vacMotor1Control(float speed);
         	float vacMotor2Control(float speed);
         	float armMotorControl(float speed);
-        	int getHomeSwitch(int location);
+        	int getHomeSwitch(void);
         };
 }
 #endif // FRC2014_GUIMANAGER

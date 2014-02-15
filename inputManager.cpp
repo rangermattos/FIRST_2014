@@ -16,6 +16,7 @@ FRC::inputManager::inputManager(float threshold, unsigned char mode) :
 }
 
 unsigned char FRC::inputManager::getMode()
+//tells if in tank or arcade.
 {
 	return driveMode;
 }
@@ -50,6 +51,7 @@ float FRC::inputManager::rateLimit( float newVal, float prevVal, float rate )
 }
 
 void FRC::inputManager::update()
+//changes the drive mode.
 {
 	switch(driveMode)
 	{
@@ -82,6 +84,7 @@ void FRC::inputManager::update()
 }
 	
 float FRC::inputManager::getMotor(int motor)
+//returns the values of the motors.
 {
 	switch(motor)
 	{
@@ -94,23 +97,6 @@ float FRC::inputManager::getMotor(int motor)
         default:
         	return 0.0f;
 	}
-}
-
-float FRC::inputManager::getZ(void)
-{
-	// used to get value of z axis for logitech joystick
-	return s2.GetZ();
-}
-
-float FRC::inputManager::getElevAxis(void)
-{
-	// return threshold(s2.GetX(), thresh)
-	return s2.GetY();
-}
-
-float FRC::inputManager::getArmAxis(void)
-{
-	return s2.GetRawAxis(6);
 }
 
 bool FRC::inputManager::getButton(int joystick, int button)
@@ -163,39 +149,4 @@ float FRC::inputManager::getAxis(int joystick, int axis)
 	default:
 		return 0.0f;
 	}
-}
-
-float FRC::inputManager::Joystick1(void)
-{
-	return s1.GetY();
-}
-
-float FRC::inputManager::Joystick2(void)
-{
-	return s1.GetX();
-}
-
-float FRC::inputManager::Joystick3(void)
-{
-	return s2.GetX();
-}
-
-float FRC::inputManager::Joystick4(void)
-{
-	return s2.GetY();
-}
-
-float FRC::inputManager::Joystick5(void)
-{
-	return s3.GetX();
-}
-
-float FRC::inputManager::Joystick6(void)
-{
-	return s3.GetY();
-}
-
-float FRC::inputManager::Joystick7(void)
-{
-	return s3.GetRawAxis(6);
 }

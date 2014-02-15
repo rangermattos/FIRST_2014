@@ -9,36 +9,10 @@ FRC::elevManager::elevManager( FRC::deviceManager * devMan, FRC::guiManager * gu
 	devices->setControlMode(1, 5);
 }
 
-void FRC::elevManager::moveElevator( float speed )
-{
-	height = devices->getAnalogVoltage(1);
-	float direction = (speed >= 0) ? 1 : -1;
-	
-	// rewrite code, we want to move freely until an end stop prevents up or down motion
-	//if(height >= MIN_HEIGHT && height <= MAX_HEIGHT)
-	//{
-	if(direction > 0)
-	{
-		if(height <= MAX_HEIGHT)
-		{	
-			devices->setSpeed(3, speed);
-			devices->setSpeed(4, speed);
-		}
-	}
-	else if(direction < 0)
-	{
-		if(height >= MIN_HEIGHT && devices->getHomeSwitch(1) == 1)
-		{
-			devices->setSpeed(3, speed);
-			devices->setSpeed(4, speed);
-		}
-	}
-}
-
-
 void FRC::elevManager::moveArm( float speed )
+//Used to move the arm. Also invloves height constraints of the arm. 
 {	
-	height = devices->getAnalogVoltage(4);
+	height = devices->getAnalogVoltage(3);
 	float direction = (speed >= 0) ? 1 : -1;
 	//if(height >= MIN_HEIGHT && height <= MAX_HEIGHT)
 	//{
@@ -51,7 +25,7 @@ void FRC::elevManager::moveArm( float speed )
 	}
 	else if(direction < 0)
 	{
-		if(height >= MIN_HEIGHT && devices->getHomeSwitch(2) == 1)
+		if(height >= MIN_HEIGHT && devices->getHomeSwitch() == 1)
 		{
 			devices->setCANJag(1, speed);
 		}
