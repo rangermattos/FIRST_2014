@@ -3,21 +3,24 @@
 FRC::deviceManager::deviceManager() :
 	drivemotor1(1),
 	drivemotor2(2),
+	vacMotor1(3),
+	vacMotor2(4),
 	gyro(2),
 	ultrasonic(3),
 	armPotHeight(4),
 	armhomeswitch(3),
 	compressor(1,1),
 	armfire(1),
-	lowsp(2),
-	highsp(3),
+	armrelief(2),
+	lowsp(3),
+	highsp(4),
 	pistonExtended(0)
 	//encoder1(1, 2, true),
 	//encoder2(1, 2, true),
 {
 	armMotor = new CANJaguar(1);
-	vacMotor1 = new CANJaguar(2);
-	vacMotor2 = new CANJaguar(3);
+	//vacMotor1 = new CANJaguar(2);
+	//vacMotor2 = new CANJaguar(3);
 }
 
 void FRC::deviceManager::setSpeed(int motor, float speed)
@@ -43,9 +46,12 @@ void FRC::deviceManager::setSolenoid(int sol, bool set)
 		armfire.Set(set);
 		break;
 	case 2:
-		lowsp.Set(set);
+		armrelief.Set(set);
 		break;
 	case 3:
+		lowsp.Set(set);
+		break;
+	case 4:
 		highsp.Set(set);
 		break;
 	}
@@ -92,10 +98,10 @@ float FRC::deviceManager::getCANJagCurrent(int CANJag)
 	{
 	case 1:
 		return armMotor->GetOutputCurrent();
-	case 2:
-		return vacMotor1->GetOutputCurrent();
-	case 3:
-		return vacMotor2->GetOutputCurrent();
+	//case 2:
+	//	return vacMotor1->GetOutputCurrent();
+	//case 3:
+	//	return vacMotor2->GetOutputCurrent();
 	default:
 		return armMotor->GetOutputCurrent();
 	}
@@ -109,12 +115,14 @@ void FRC::deviceManager::setCANJag(int CANJag, float value)
 	case 1:
 		armMotor->Set(value);
 		break;
-	case 2:
-		vacMotor1->Set(value);
-		break;
-	case 3:
-		vacMotor2->Set(value);
-		break;
+	//case 2:
+	//	vacMotor1->Set(value);
+	//	break;
+	//case 3:
+	//	vacMotor2->Set(value);
+	//	break;
+	default:
+		armMotor->Set(value);
 	}
 }
 
@@ -135,7 +143,7 @@ void FRC::deviceManager::setControlMode(int CANJag, int mode)
 		else if(mode == 5)
 			armMotor->ChangeControlMode(CANJaguar::kVoltage);
 		break;
-	case 2:
+	/*case 2:
 		if(mode == 1)
 			vacMotor1->ChangeControlMode(CANJaguar::kPercentVbus);
 		else if(mode == 2)
@@ -158,7 +166,7 @@ void FRC::deviceManager::setControlMode(int CANJag, int mode)
 			vacMotor2->ChangeControlMode(CANJaguar::kPosition);
 		else if(mode == 5)
 			vacMotor2->ChangeControlMode(CANJaguar::kVoltage);
-		break;
+		break;*/
 	}	
 }
 
@@ -174,7 +182,7 @@ void FRC::deviceManager::setPositionReference(int CANJag, int reference)
 		else if(reference == 2)
 			armMotor->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
 		break;
-	case 2:
+	/*case 2:
 		if(reference == 1)
 			vacMotor1->SetPositionReference(CANJaguar::kPosRef_QuadEncoder);
 		else if(reference == 2)
@@ -185,7 +193,7 @@ void FRC::deviceManager::setPositionReference(int CANJag, int reference)
 			vacMotor2->SetPositionReference(CANJaguar::kPosRef_QuadEncoder);
 		else if(reference == 2)
 			vacMotor2->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
-		break;
+		break;*/
 	}
 }
 
@@ -204,7 +212,7 @@ float FRC::deviceManager::getAnalogVoltage( int analog )
 		return gyro.GetVoltage();
 	case 2:
 		return ultrasonic.GetVoltage();
-	case 4:
+	case 3:
 		return armPotHeight.GetVoltage();
 	default:
 		break;
@@ -223,12 +231,12 @@ float FRC::deviceManager::drivemotor2Control(float speed)
 
 float FRC::deviceManager::vacMotor1Control(float speed)
 {
-	vacMotor1->Set(speed, 0);
+	vacMotor1.Set(speed, 0);
 }
 
-float FRC::deviceManager::vacMotor2Control(float speed)
+float FRC::deviceManager::vacMotor2Control(float speed) 
 {
-	vacMotor2->Set(speed, 0);
+	vacMotor2.Set(speed, 0);
 }
 
 float FRC::deviceManager::armMotorControl(float speed)

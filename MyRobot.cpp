@@ -20,7 +20,11 @@ class RobotDemo : public SimpleRobot
 	FRC::vacManager vacMan;
 	FRC::elevManager elevMan;
 	DriverStation *drive;
+	I2C *wire;
+	unsigned char datareceived[2];
+	unsigned char datatosend[1];
 	float distance;
+	float angle;
 	float speed;
 	bool IsArcade, prevArcade;
 	
@@ -52,35 +56,57 @@ public:
          */
         void Autonomous()
         {
+        	devices.startCompressor();
+        	devices.vacMotor1Control(1);
+        	devices.vacMotor2Control(1);
         	while (IsAutonomous())
         	{
                 //myRobot.SetSafetyEnabled(false);
-        		//distance = devices->getVoltage(3)*512/5;
-        		if (distance < 48) // less than 48 inches / 4 feet
+        		distance = devices.getAnalogVoltage(2)*512/5;
+        		while (distance < 48 || distance > 72)
         		{
-        			// backwards
-        			speed = -0.021 * distance + 1; // 0.021 = 1/48
-        			speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
-        			speed /= 2;
-        			devices.setSpeed(1, speed);
-        			devices.setSpeed(2, -speed);
+        			distance = devices.getAnalogVoltage(2)*512/5;
+        			if (distance < 48) // less than 48 inches / 4 feet
+        			{
+        				// backwards
+        				speed = -0.021 * distance + 1; // 0.021 = 1/48
+        				speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
+        				speed /= 2;
+        				devices.setSpeed(1, -0.8*speed);
+        				devices.setSpeed(2, speed);
+        			}
+        			else if(distance > 72 ) // more than 72 inches / 6 feet
+        			{
+        				// forwards
+        				speed = 0.021 * (distance-72);
+        				speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
+        				speed /= 2;
+        				devices.setSpeed(1, 0.8*speed);
+        				devices.setSpeed(2, -speed);
+        			}
+        			else 
+        			{
+        				// stopped
+        				speed = 0.0f;
+        				devices.setSpeed(1, speed);
+        				devices.setSpeed(2, speed);
+        			}
+        			Wait(0.005);
         		}
-        		else if(distance > 72 ) // more than 72 inches / 6 feet
+        		vacMan.vacuum();
+        		angle = devices.getAnalogVoltage(3);
+        		while (angle > 2.6)
         		{
-        			// forwards
-        			speed = 0.021 * (distance-72);
-        			speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
-        			speed /= 2;
-        			devices.setSpeed(1, -speed);
-        			devices.setSpeed(2, speed);
+        			angle = devices.getAnalogVoltage(3);
+        			// JASPY COMMENTS: May need to set greater than -1 (-.9???) so it doesn't run past the desired angle
+        			elevMan.moveArm(-1);
+        			Wait(0.005);
         		}
-        		else 
-        		{
-        			// stopped
-        			speed = 0.0f;
-        			devices.setSpeed(1, speed);
-        			devices.setSpeed(2, speed);
-        		}
+        		
+        		
+        		if (angle < 2.7) 
+        			vacMan.shoot();
+        		
         		Wait(0.005); // wait for a motor update time
         	}
         }
@@ -92,18 +118,33 @@ public:
         {
             //myRobot.SetSafetyEnabled(false);
         	//int i = 0;
-        	// Set shifter to low
-			devices.setSolenoid(2, true);
-			devices.setSolenoid(3, false);
+        	// Initial arm solenoid setting
+			devices.setSolenoid(1, false); // arm solenoid
+			devices.setSolenoid(2, true); // arm relief solenoid
+			
+			// Set shifter to low
+			devices.setSolenoid(3, true);
+			devices.setSolenoid(4, false);
 			guiMan.print(0, "Speed Low");
 			
         	devices.setPositionReference(1, 2);
+        	
+        	// I2C wire connection
+        	//wire = DigitalModule::GetInstance(1)->GetI2C(4);
+        	//wire->SetCompatibilityMode(true);
+        	//conn = wire->AddressOnly();
         	
             while (IsOperatorControl())
             {
             	//----------START UP----------------------------------------------
             	//----------------------------------------------------------------
             	//----------------------------------------------------------------
+            	
+            	// Initial I2C start up
+            	//wire->Write(4, 0);
+            	//wire->Transaction(datatosend, 0, datareceived, 2);
+            	//guiMan.print(5, "CmpT = 0x %ld, VacT = 0x %X", datareceived[0], datareceived[1];
+            	//itoa(A, butter, 16;
             	
             	// Update InputManager
             	inpMan.update();
@@ -115,6 +156,8 @@ public:
             	
             	//---------------Jaguar Mode--------------------------------------
         		devices.setControlMode(1 ,1);//set the CANJaguar to speed mode.
+        		//devices.setControlMode(2 ,1);
+        		//devices.setControlMode(3 ,1);
                 
             	//----------ARCADE TANK SWITCH------------------------------------
             	// xbox back button / joystick button 7 : switching drive modes
@@ -141,29 +184,23 @@ public:
                 
         		//----------HIGH LOW SPEED SWITCHING------------------------------
                 // read and activate solenoids for the speed shifter.
-        		if (inpMan.getButton(1, 6)) // toggle solenoids with x button / 3 button
+        		if (inpMan.getButton(1, 7)) // toggle solenoids with x button / 3 button
         		{
-        			while (inpMan.getButton(1, 6))
-        			{
-        				if (!devices.isPistonExtended())
-        				{
-        					devices.setSolenoid(2, true);
-        					devices.setSolenoid(3, false);
-        					guiMan.print(0, "Speed Low");
-        				}
-        				else
-        				{
-        					devices.setSolenoid(2, false);
-        					devices.setSolenoid(3, true);
-        					guiMan.print(0, "Speed High");
-        				}
-        			}
-    				devices.togglePistonExtended();
+        			devices.setSolenoid(3, false);
+        			devices.setSolenoid(4, true);
+        			guiMan.print(0, "Speed high");
+        		}
+        		
+        		if (inpMan.getButton(1, 6))
+        		{
+        			devices.setSolenoid(3, true);
+        			devices.setSolenoid(4, false);
+        			guiMan.print(0, "Speed low");
         		}
         		
         		//----------SET DRIVE MOTOR COMMANDS------------------------------        
-                devices.setSpeed(1, inpMan.getMotor(1));
-                devices.setSpeed(2, -inpMan.getMotor(2));
+                devices.setSpeed(1, -inpMan.getMotor(1) * 0.8f);
+                devices.setSpeed(2, inpMan.getMotor(2) * 0.8f);
                 
                 
                 //----------SHOOTER CODE------------------------------------------
@@ -174,24 +211,41 @@ public:
                 elevMan.moveArm(-inpMan.getAxis(2, 6));
                 
                 //----------MANAGE VACUUM SHOOTING--------------------------------
-                // button 3 shoots
-                //vacMan.vacuum();
+                if (inpMan.getButton(2, 5))
+                {
+                	devices.vacMotor1Control(1);
+                	devices.vacMotor2Control(1);
+                	guiMan.print(2, "Vacuum on");
+                }
                 
-                //if(inpMan.getButton(2, 1))
-                //{
-                	//vacMan.shoot();
-                //}
+                if (inpMan.getButton(2, 6))
+                {
+                	devices.vacMotor1Control(0);
+                	devices.vacMotor2Control(0);
+                	guiMan.print(0, "Vacuum off");
+                }
                 
-                                
+                if (inpMan.getButton(2, 2))
+                {
+                	vacMan.vacuum();
+                	guiMan.print(3, "Solenoid armed");
+                }
+
+                // button 1 on joystick 2 shoots
+                if (inpMan.getButton(2, 1))
+                {
+                	vacMan.shoot();
+                	guiMan.print(3, "Solenoid fired");
+                }
                 
                 //------------------COMPRESSOR ON/OFF--------------------------
                 // Compressor On/Off
-                if (drive->GetDigitalIn(1) == 1)
+                if (drive->GetDigitalIn(1) == 1) //change to remove == 1
                 {
                 	guiMan.print(1, "Compressor On");
                     devices.startCompressor();
                 }
-                else if (drive->GetDigitalIn(1) == 0)
+                else if (drive->GetDigitalIn(1) == 0) //change to remove == 0, replace with !
                 {
                    	guiMan.print(1, "Compressor Off");
                    	devices.stopCompressor();
@@ -210,6 +264,7 @@ public:
                 guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(3));
                 //guiMan.print(4, "Elev Home = %d", devices.getHomeSwitch(1)); //if d doesn't work try i
                 //guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch(2));
+                guiMan.print(5, "Distance = %f", devices.getAnalogVoltage(2)*512/5);
                 
                 //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display
@@ -226,28 +281,16 @@ public:
          */
         void Test() 
         {
+        	// set shifter to low
+        	devices.setSolenoid(1, false); // arm solenoid
+        	devices.setSolenoid(2, true); // arm relief solenoid
+        	devices.setSolenoid(3, true); // 1/2 shifter solenoid
+        	devices.setSolenoid(4, false); // 1/2 shifter solenoid
+        	guiMan.print(0, "Speed low");
         	
         	while (IsTest())
-        	{
-        		if (inpMan.getButton(1, 6)) // toggle solenoids for shifters with RB button / 6 button
-        		{
-        			while (inpMan.getButton(1, 6))
-        		{
-        			if (!devices.isPistonExtended())
-        		    {
-        				devices.setSolenoid(2, true);
-        				devices.setSolenoid(3, false);
-        		        guiMan.print(0, "Speed Low");
-        		    }
-        			else
-        		    {
-        				devices.setSolenoid(2, false);
-        		        devices.setSolenoid(3, true);
-        		        guiMan.print(0, "Speed High");
-        		     }
-        		 }
-        		 devices.togglePistonExtended();
-        	}
+        	{        		
+        		// Compressor On/Off
                 if (drive->GetDigitalIn(1) == 1)// starts the compressor using digital input one on the drivers station.
                 {
                 	guiMan.print(1, "Compressor On");
@@ -258,7 +301,18 @@ public:
                    	guiMan.print(1, "Compressor Off");
                    	devices.stopCompressor();
                 }
-        		devices.setControlMode(1, 1);// changes the control mode of the CANJaguar to speed control mode.
+                // Joysticks
+        		devices.setControlMode(1, 1);
+        		//devices.setControlMode(2, 1);
+        		//devices.setControlMode(3, 1);
+        		devices.drivemotor1Control(inpMan.Joystick2());
+        		devices.drivemotor2Control(inpMan.Joystick1());
+        		//devices.elevMotor1Control(inpMan.Joystick3());
+        		//devices.elevMotor2Control(inpMan.Joystick4());
+        		devices.vacMotor1Control(inpMan.Joystick5());
+        		devices.vacMotor2Control(inpMan.Joystick6());
+        		devices.armMotorControl(inpMan.Joystick7());
+        		
         		if (inpMan.getButton(2, 5) == 1)// Starts the vaccuum when button five (LB) is pressed.
         		{
         			devices.setCANJag(2, 1);
@@ -271,14 +325,17 @@ public:
         		}
         		if (inpMan.getButton(2, 6) == 1)//extends the firing piston when button six is pressed on the shooting joystick.
         		{
-        			devices.setSolenoid(1, 1);
+        			devices.setSolenoid(1, true);
+        			devices.setSolenoid(2, false);
         		}
         		else
         		{
-        			devices.setSolenoid(1, 0);
+        			devices.setSolenoid(1, false);
+        			devices.setSolenoid(2, true);
         		}
         		guiMan.print(2, "Vac Current = %f", devices.getCANJagCurrent(2));
         		guiMan.print(3, "Firing Solenoid = %d", inpMan.getButton(2, 6));
+        		guiMan.print(4, "Shifter switch = %d", inpMan.getButton(1, 6));
                 guiMan.update();
         	}
         }

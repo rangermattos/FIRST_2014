@@ -1,5 +1,5 @@
 #include "elevManager.hpp"
-#define MAX_HEIGHT 5.0
+#define MAX_HEIGHT 3.62
 #define MIN_HEIGHT 0.0
 
 FRC::elevManager::elevManager( FRC::deviceManager * devMan, FRC::guiManager * guiMan )

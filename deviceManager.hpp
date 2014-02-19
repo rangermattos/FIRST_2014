@@ -12,12 +12,13 @@ namespace FRC
         {
         private:
         	Victor drivemotor1, drivemotor2;
+        	Talon vacMotor1, vacMotor2;
         	AnalogChannel gyro, ultrasonic, armPotHeight;
         	DigitalInput armhomeswitch;
         	Compressor compressor;
-        	Solenoid armfire, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
+        	Solenoid armfire, armrelief, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
         	bool pistonExtended;
-        	CANJaguar *vacMotor1, *vacMotor2, *armMotor; 
+        	CANJaguar *armMotor; 
         	//CANJaguar *can2;
         	//CANJaguar *can3;
         	//Encoder encoder1, encoder2;

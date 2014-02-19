@@ -5,45 +5,51 @@ FRC::vacManager::vacManager( FRC::deviceManager * devMan, FRC::guiManager * guiM
 {
 	devices = devMan;
 	gMan = guiMan;
-	devices->setControlMode(2, 5);
-	devices->setControlMode(3, 5);
+	//devices->setControlMode(2, 5);
+	//devices->setControlMode(3, 5);
+	bool armReady = false;
 }
 
 void FRC::vacManager::vacuum()
 //Use the CANJaguar current to tell if the ball can be fired.
 {	
-	CANJagCurrent1 = devices->getCANJagCurrent(2);
+	/*CANJagCurrent1 = devices->getCANJagCurrent(2);
 	CANJagCurrent2 = devices->getCANJagCurrent(3);
 	
 	// debugging : print out both CANJaguar currents
 	gMan->print(4, "%d", CANJagCurrent1);
 	gMan->print(5, "%d", CANJagCurrent2);
+	*/
 	
-	if(CANJagCurrent1 < currentThreshold)
-	{
+	//if(!armReady)
+	//{
 		
 		// arm firing solenoid
-		devices->setSolenoid(1, 1);
-		Wait(0.050);
-		devices->setSolenoid(1, 0);	
+		devices->setSolenoid(1, true);
+		//Wait(0.050);
+		devices->setSolenoid(2, false);	
 		
-	}
+		//armReady = true;
+		
+	//}
 }
 
 void FRC::vacManager::shoot()
 //turns off the vacuum to fire.
 {
-	if(CANJagCurrent1 < currentThreshold)
-	{
+	//if(armReady)
+	//{
 		// turn off vacuum temporarily
-		devices->setCANJag(2, 0);
-		devices->setCANJag(3, 0);
+		devices->vacMotor1Control(0);
+		devices->vacMotor2Control(0);
 		
-		Wait(0.050);
+		Wait(2.0);
 		
-		devices->setCANJag(2, 1);
-		devices->setCANJag(3, 1);
-	}
+		devices->setSolenoid(1, false);
+		devices->setSolenoid(2, true);
+				
+		//armReady = false;
+	//}
 }
 
 

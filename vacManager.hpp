@@ -12,8 +12,9 @@ namespace FRC
 		FRC::deviceManager * devices;
 		FRC::guiManager * gMan;
 		float currentThreshold;
-		float CANJagCurrent1;
-		float CANJagCurrent2;
+		//float CANJagCurrent1;
+		//float CANJagCurrent2;
+		bool armReady;
 		
 	public:
 		vacManager( FRC::deviceManager * devMan, FRC::guiManager * guiMan );
