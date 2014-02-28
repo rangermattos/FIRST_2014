@@ -5,6 +5,7 @@
 #include "guiManager.hpp"
 #include "vacManager.hpp"
 #include "elevManager.hpp"
+#include <string>
 //#include "netManager.hpp"
 /**
  * This is a demo program showing the use of the RobotBase class.
@@ -27,6 +28,8 @@ class RobotDemo : public SimpleRobot
 	float angle;
 	float speed;
 	bool IsArcade, prevArcade;
+	int CmpP, SpdP;
+	
 	
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
@@ -116,6 +119,8 @@ public:
          */
         void OperatorControl()
         {
+        	guiMan.clear();
+        	
             //myRobot.SetSafetyEnabled(false);
         	//int i = 0;
         	// Initial arm solenoid setting
@@ -125,13 +130,13 @@ public:
 			// Set shifter to low
 			devices.setSolenoid(3, true);
 			devices.setSolenoid(4, false);
-			guiMan.print(0, "Speed Low");
+			guiMan.print(0, "Spd LOW : Cmp ON");
 			
         	devices.setPositionReference(1, 2);
         	
         	// I2C wire connection
-        	//wire = DigitalModule::GetInstance(1)->GetI2C(4);
-        	//wire->SetCompatibilityMode(true);
+        	wire = DigitalModule::GetInstance(1)->GetI2C(4);
+        	wire->SetCompatibilityMode(true);
         	//conn = wire->AddressOnly();
         	
             while (IsOperatorControl())
@@ -141,9 +146,9 @@ public:
             	//----------------------------------------------------------------
             	
             	// Initial I2C start up
-            	//wire->Write(4, 0);
-            	//wire->Transaction(datatosend, 0, datareceived, 2);
-            	//guiMan.print(5, "CmpT = 0x %ld, VacT = 0x %X", datareceived[0], datareceived[1];
+            	wire->Write(4, 0);
+            	wire->Transaction(datatosend, 0, datareceived, 2);
+            	guiMan.print(5, "VacT = 0x%ld / 0x50 MAX", datareceived[0]);
             	//itoa(A, butter, 16;
             	
             	// Update InputManager
@@ -184,18 +189,18 @@ public:
                 
         		//----------HIGH LOW SPEED SWITCHING------------------------------
                 // read and activate solenoids for the speed shifter.
-        		if (inpMan.getButton(1, 7)) // toggle solenoids with x button / 3 button
+        		if (inpMan.getButton(1, 6)) // toggle solenoids with x button / 3 button
         		{
         			devices.setSolenoid(3, false);
         			devices.setSolenoid(4, true);
-        			guiMan.print(0, "Speed high");
+        			//guiMan.print(0, "Speed high");
         		}
         		
-        		if (inpMan.getButton(1, 6))
+        		if (inpMan.getButton(1, 7))
         		{
         			devices.setSolenoid(3, true);
         			devices.setSolenoid(4, false);
-        			guiMan.print(0, "Speed low");
+        			//guiMan.print(0, "Speed low");
         		}
         		
         		//----------SET DRIVE MOTOR COMMANDS------------------------------        
@@ -242,12 +247,12 @@ public:
                 // Compressor On/Off
                 if (drive->GetDigitalIn(1) == 1) //change to remove == 1
                 {
-                	guiMan.print(1, "Compressor On");
+                	//guiMan.print(1, "Compressor On");
                     devices.startCompressor();
                 }
                 else if (drive->GetDigitalIn(1) == 0) //change to remove == 0, replace with !
                 {
-                   	guiMan.print(1, "Compressor Off");
+                   	//guiMan.print(1, "Compressor Off");
                    	devices.stopCompressor();
                 }
                                 
@@ -257,14 +262,51 @@ public:
                 //------------------------------------------------------------
                 
                 //------------------GUI PRINTS FOR DRIVER---------------------
+                if (drive->GetDigitalIn(1))
+                {
+                	CmpP = 2;
+                }
+                else
+                {
+                    CmpP = 5;
+                                	
+                }
+                //CmpP = (drive->GetDigitalIn(1)) ? "Cmp ON" : "Cmp OFF";
+                
+                if (inpMan.getButton(1, 6))
+                {
+                	SpdP = 3;
+                }
+                if (inpMan.getButton(1, 7))
+                {
+                	SpdP = 7;
+                }
+                //guiMan.print(0, "%s : %s", SpdP, CmpP);
+                if (SpdP + CmpP == 12)
+                {
+                	guiMan.print(0, "Spd LOW : Cmp OFF");
+                }
+                if (SpdP + CmpP == 8) 
+                {
+                	guiMan.print(0, "Spd HIGH : Cmp OFF");
+                }
+                if (SpdP + CmpP == 5)
+                {
+                	guiMan.print(0, "Spd HIGH : Cmp ON");
+                }
+                if (SpdP + CmpP == 9)
+                {
+                	guiMan.print(0, "Spd LOW : Cmp ON");
+                }
+                
                 //guiMan.print(2, "Left Motor = %f", -inpMan.getMotor(1));
                 //guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
                 //guiMan.print(2, "Elev Axis = %f", inpMan.getElevAxis());
                 //guiMan.print(3, "Arm Axis = %f", inpMan.getArmAxis());
-                guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(3));
+                //guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(3));
                 //guiMan.print(4, "Elev Home = %d", devices.getHomeSwitch(1)); //if d doesn't work try i
                 //guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch(2));
-                guiMan.print(5, "Distance = %f", devices.getAnalogVoltage(2)*512/5);
+                guiMan.print(4, "Distance(ft) = %f", devices.getAnalogVoltage(2)*512/60);
                 
                 //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display

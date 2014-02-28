@@ -21,6 +21,7 @@ namespace FRC
         	guiManager();
         	void print(int line, const char *message, ...);
         	void update();
+        	void clear();
         	
         };
 }

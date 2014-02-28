@@ -36,3 +36,13 @@ void FRC::guiManager::update()
 {
 	display->UpdateLCD();
 }
+
+void FRC::guiManager::clear()
+{
+	display->PrintfLine(DriverStationLCD::kUser_Line1, "");
+	display->PrintfLine(DriverStationLCD::kUser_Line2, "");
+	display->PrintfLine(DriverStationLCD::kUser_Line3, "");
+	display->PrintfLine(DriverStationLCD::kUser_Line4, "");
+	display->PrintfLine(DriverStationLCD::kUser_Line5, "");
+	display->PrintfLine(DriverStationLCD::kUser_Line6, "");
+}
