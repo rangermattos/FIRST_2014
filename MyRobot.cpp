@@ -21,7 +21,8 @@ class RobotDemo : public SimpleRobot
 	FRC::vacManager vacMan;
 	FRC::elevManager elevMan;
 	DriverStation *drive;
-	I2C *wire;
+	I2C *wire_read;
+	I2C *wire_write;
 	unsigned char datareceived[2];
 	unsigned char datatosend[1];
 	float distance;
@@ -29,6 +30,7 @@ class RobotDemo : public SimpleRobot
 	float speed;
 	bool IsArcade, prevArcade;
 	int CmpP, SpdP;
+	bool status_write, status_trans;
 	
 	
 	//DriverStationLCD *display;
@@ -130,14 +132,22 @@ public:
 			// Set shifter to low
 			devices.setSolenoid(3, true);
 			devices.setSolenoid(4, false);
+			SpdP = 7;
+			CmpP = 2;
 			guiMan.print(0, "Spd LOW : Cmp ON");
+			guiMan.print(1, "Vacuum OFF");
 			
         	devices.setPositionReference(1, 2);
         	
-        	// I2C wire connection
-        	wire = DigitalModule::GetInstance(1)->GetI2C(4);
-        	wire->SetCompatibilityMode(true);
+        	// I2C start-up wire connection
+        	/*
+        	wire_read = DigitalModule::GetInstance(1)->GetI2C(4);
+        	wire_read->SetCompatibilityMode(true);
+        	
+        	wire_write = DigitalModule::GetInstance(1)->GetI2C(5);  // WAS GetI2C(4)
+        	wire_write->SetCompatibilityMode(true);
         	//conn = wire->AddressOnly();
+        	*/
         	
             while (IsOperatorControl())
             {
@@ -145,11 +155,16 @@ public:
             	//----------------------------------------------------------------
             	//----------------------------------------------------------------
             	
-            	// Initial I2C start up
-            	wire->Write(4, 0);
-            	wire->Transaction(datatosend, 0, datareceived, 2);
+            	// I2C read/write commands          	
+            	/*
+            	status_write = wire_write->Write(inpMan.getButton(2, 11), 0);
+            	guiMan.print(3, "Print test = 0x%i", inpMan.getButton(2, 11));
+            	guiMan.print(2, "Status write = %i", status_write);
+            	
+            	wire_read->Write(4, 12);
+            	wire_read->Transaction(datatosend, 0, datareceived, 1);
             	guiMan.print(5, "VacT = 0x%ld / 0x50 MAX", datareceived[0]);
-            	//itoa(A, butter, 16;
+            	*/
             	
             	// Update InputManager
             	inpMan.update();
@@ -159,7 +174,7 @@ public:
             	//----------------------------------------------------------------
             	//----------------------------------------------------------------
             	
-            	//---------------Jaguar Mode--------------------------------------
+            	//----------JAGUAR MODE-------------------------------------------
         		devices.setControlMode(1 ,1);//set the CANJaguar to speed mode.
         		//devices.setControlMode(2 ,1);
         		//devices.setControlMode(3 ,1);
@@ -213,34 +228,38 @@ public:
                 //----------------------------------------------------------------
                 
                 //----------ARM CONTROL-------------------------------------------
-                elevMan.moveArm(-inpMan.getAxis(2, 6));
+                elevMan.moveArm(-inpMan.getAxis(2, 2)); // Forward back axis of joystick
                 
                 //----------MANAGE VACUUM SHOOTING--------------------------------
                 if (inpMan.getButton(2, 5))
                 {
-                	devices.vacMotor1Control(1);
-                	devices.vacMotor2Control(1);
-                	guiMan.print(2, "Vacuum on");
+                	devices.vacMotor1Control(0.9);
+                	devices.vacMotor2Control(0.9); //0.9 is good
+                	guiMan.print(1, "Vacuum ON");
                 }
                 
                 if (inpMan.getButton(2, 6))
                 {
                 	devices.vacMotor1Control(0);
                 	devices.vacMotor2Control(0);
-                	guiMan.print(0, "Vacuum off");
+                	guiMan.print(1, "Vacuum OFF");
                 }
                 
-                if (inpMan.getButton(2, 2))
-                {
-                	vacMan.vacuum();
-                	guiMan.print(3, "Solenoid armed");
-                }
+                //if (inpMan.getButton(2, 2))
+                //{
+                //	vacMan.vacuum();
+                //	guiMan.print(3, "Solenoid armed");
+                //}
 
                 // button 1 on joystick 2 shoots
                 if (inpMan.getButton(2, 1))
                 {
+                	//vacMan.shoot();
+                	//guiMan.print(3, "Solenoid fired");
+                	
+                	guiMan.print(2, "Solenoid FIRED");
                 	vacMan.shoot();
-                	guiMan.print(3, "Solenoid fired");
+                	guiMan.print(2, "Solenoid RESET");
                 }
                 
                 //------------------COMPRESSOR ON/OFF--------------------------
@@ -262,6 +281,7 @@ public:
                 //------------------------------------------------------------
                 
                 //------------------GUI PRINTS FOR DRIVER---------------------
+                // Compressor state description
                 if (drive->GetDigitalIn(1))
                 {
                 	CmpP = 2;
@@ -271,8 +291,8 @@ public:
                     CmpP = 5;
                                 	
                 }
-                //CmpP = (drive->GetDigitalIn(1)) ? "Cmp ON" : "Cmp OFF";
                 
+                // Shifter state description
                 if (inpMan.getButton(1, 6))
                 {
                 	SpdP = 3;
@@ -281,7 +301,8 @@ public:
                 {
                 	SpdP = 7;
                 }
-                //guiMan.print(0, "%s : %s", SpdP, CmpP);
+                
+                // Combined compressor shifter state
                 if (SpdP + CmpP == 12)
                 {
                 	guiMan.print(0, "Spd LOW : Cmp OFF");
@@ -303,10 +324,11 @@ public:
                 //guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
                 //guiMan.print(2, "Elev Axis = %f", inpMan.getElevAxis());
                 //guiMan.print(3, "Arm Axis = %f", inpMan.getArmAxis());
-                //guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(3));
+                guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(3));
                 //guiMan.print(4, "Elev Home = %d", devices.getHomeSwitch(1)); //if d doesn't work try i
-                //guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch(2));
+                //guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch());
                 guiMan.print(4, "Distance(ft) = %f", devices.getAnalogVoltage(2)*512/60);
+                
                 
                 //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display

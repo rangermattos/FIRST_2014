@@ -19,6 +19,8 @@ FRC::deviceManager::deviceManager() :
 	//encoder2(1, 2, true),
 {
 	armMotor = new CANJaguar(1);
+	testMotor1 = new CANJaguar(3);
+	testMotor2 = new CANJaguar(4);
 	//vacMotor1 = new CANJaguar(2);
 	//vacMotor2 = new CANJaguar(3);
 }
@@ -98,10 +100,10 @@ float FRC::deviceManager::getCANJagCurrent(int CANJag)
 	{
 	case 1:
 		return armMotor->GetOutputCurrent();
-	//case 2:
-	//	return vacMotor1->GetOutputCurrent();
-	//case 3:
-	//	return vacMotor2->GetOutputCurrent();
+	case 2:
+		return testMotor1->GetOutputCurrent();
+	case 3:
+		return testMotor2->GetOutputCurrent();
 	default:
 		return armMotor->GetOutputCurrent();
 	}
@@ -115,12 +117,12 @@ void FRC::deviceManager::setCANJag(int CANJag, float value)
 	case 1:
 		armMotor->Set(value);
 		break;
-	//case 2:
-	//	vacMotor1->Set(value);
-	//	break;
-	//case 3:
-	//	vacMotor2->Set(value);
-	//	break;
+	case 2:
+		testMotor1->Set(value);
+		break;
+	case 3:
+		testMotor2->Set(value);
+		break;
 	default:
 		armMotor->Set(value);
 	}
@@ -143,30 +145,30 @@ void FRC::deviceManager::setControlMode(int CANJag, int mode)
 		else if(mode == 5)
 			armMotor->ChangeControlMode(CANJaguar::kVoltage);
 		break;
-	/*case 2:
+	case 2:
 		if(mode == 1)
-			vacMotor1->ChangeControlMode(CANJaguar::kPercentVbus);
+			testMotor1->ChangeControlMode(CANJaguar::kPercentVbus);
 		else if(mode == 2)
-			vacMotor1->ChangeControlMode(CANJaguar::kCurrent);
+			testMotor1->ChangeControlMode(CANJaguar::kCurrent);
 		else if(mode == 3)
-			vacMotor1->ChangeControlMode(CANJaguar::kSpeed);
+			testMotor1->ChangeControlMode(CANJaguar::kSpeed);
 		else if(mode == 4)
-			vacMotor1->ChangeControlMode(CANJaguar::kPosition);
+			testMotor1->ChangeControlMode(CANJaguar::kPosition);
 		else if(mode == 5)
-			vacMotor1->ChangeControlMode(CANJaguar::kVoltage);
+			testMotor1->ChangeControlMode(CANJaguar::kVoltage);
 		break;
 	case 3:
 		if(mode == 1)
-			vacMotor2->ChangeControlMode(CANJaguar::kPercentVbus);
+			testMotor2->ChangeControlMode(CANJaguar::kPercentVbus);
 		else if(mode == 2)
-			vacMotor2->ChangeControlMode(CANJaguar::kCurrent);
+			testMotor2->ChangeControlMode(CANJaguar::kCurrent);
 		else if(mode == 3)
-			vacMotor2->ChangeControlMode(CANJaguar::kSpeed);
+			testMotor2->ChangeControlMode(CANJaguar::kSpeed);
 		else if(mode == 4)
-			vacMotor2->ChangeControlMode(CANJaguar::kPosition);
+			testMotor2->ChangeControlMode(CANJaguar::kPosition);
 		else if(mode == 5)
-			vacMotor2->ChangeControlMode(CANJaguar::kVoltage);
-		break;*/
+			testMotor2->ChangeControlMode(CANJaguar::kVoltage);
+		break;
 	}	
 }
 
@@ -182,18 +184,18 @@ void FRC::deviceManager::setPositionReference(int CANJag, int reference)
 		else if(reference == 2)
 			armMotor->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
 		break;
-	/*case 2:
+	case 2:
 		if(reference == 1)
-			vacMotor1->SetPositionReference(CANJaguar::kPosRef_QuadEncoder);
+			testMotor1->SetPositionReference(CANJaguar::kPosRef_QuadEncoder);
 		else if(reference == 2)
-			vacMotor1->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
+			testMotor1->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
 		break;
 	case 3:
 		if(reference == 1)
-			vacMotor2->SetPositionReference(CANJaguar::kPosRef_QuadEncoder);
+			testMotor2->SetPositionReference(CANJaguar::kPosRef_QuadEncoder);
 		else if(reference == 2)
-			vacMotor2->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
-		break;*/
+			testMotor2->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
+		break;
 	}
 }
 

@@ -7,7 +7,7 @@ FRC::vacManager::vacManager( FRC::deviceManager * devMan, FRC::guiManager * guiM
 	gMan = guiMan;
 	//devices->setControlMode(2, 5);
 	//devices->setControlMode(3, 5);
-	bool armReady = false;
+	//bool armReady = false;
 }
 
 void FRC::vacManager::vacuum()
@@ -36,22 +36,19 @@ void FRC::vacManager::vacuum()
 
 void FRC::vacManager::shoot()
 //turns off the vacuum to fire.
-{
-	//if(armReady)
-	//{
-		// turn off vacuum temporarily
-		devices->vacMotor1Control(0);
-		devices->vacMotor2Control(0);
-		
-		Wait(2.0);
-		
-		devices->setSolenoid(1, false);
-		devices->setSolenoid(2, true);
-				
-		//armReady = false;
-	//}
+{	
+	// Fire the solenoid, wait then drop vacuum then drop solenoid
+	devices->setSolenoid(1, true);
+	devices->setSolenoid(2, false);
+	
+	Wait(0.5); // Works best so far with this delay
+	
+	devices->vacMotor1Control(0);
+	devices->vacMotor2Control(0);
+			
+	Wait(2.0);
+			
+	devices->setSolenoid(1, false);
+	devices->setSolenoid(2, true);
+	
 }
-
-
-// "Beware of bugs in the above code; I have only proved it correct, not tried it."
-// --Donald Knuth

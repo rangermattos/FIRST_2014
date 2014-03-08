@@ -19,8 +19,8 @@ namespace FRC
         	Solenoid armfire, armrelief, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
         	bool pistonExtended;
         	CANJaguar *armMotor; 
-        	//CANJaguar *can2;
-        	//CANJaguar *can3;
+        	CANJaguar *testMotor1;
+        	CANJaguar *testMotor2;
         	//Encoder encoder1, encoder2;
         	//float speed;
         	//float distance;
