@@ -18,9 +18,9 @@ FRC::deviceManager::deviceManager() :
 	//encoder1(1, 2, true),
 	//encoder2(1, 2, true),
 {
-	armMotor = new CANJaguar(1);
-	testMotor1 = new CANJaguar(3);
-	testMotor2 = new CANJaguar(4);
+	armMotor = new CANJaguar(2);
+	//testMotor1 = new CANJaguar(3);
+	//testMotor2 = new CANJaguar(4);
 	//vacMotor1 = new CANJaguar(2);
 	//vacMotor2 = new CANJaguar(3);
 }
@@ -100,10 +100,10 @@ float FRC::deviceManager::getCANJagCurrent(int CANJag)
 	{
 	case 1:
 		return armMotor->GetOutputCurrent();
-	case 2:
+	/*case 2:
 		return testMotor1->GetOutputCurrent();
 	case 3:
-		return testMotor2->GetOutputCurrent();
+		return testMotor2->GetOutputCurrent();*/
 	default:
 		return armMotor->GetOutputCurrent();
 	}
@@ -117,12 +117,12 @@ void FRC::deviceManager::setCANJag(int CANJag, float value)
 	case 1:
 		armMotor->Set(value);
 		break;
-	case 2:
+	/*case 2:
 		testMotor1->Set(value);
 		break;
 	case 3:
 		testMotor2->Set(value);
-		break;
+		break;*/
 	default:
 		armMotor->Set(value);
 	}
@@ -145,7 +145,7 @@ void FRC::deviceManager::setControlMode(int CANJag, int mode)
 		else if(mode == 5)
 			armMotor->ChangeControlMode(CANJaguar::kVoltage);
 		break;
-	case 2:
+	/*case 2:
 		if(mode == 1)
 			testMotor1->ChangeControlMode(CANJaguar::kPercentVbus);
 		else if(mode == 2)
@@ -168,7 +168,7 @@ void FRC::deviceManager::setControlMode(int CANJag, int mode)
 			testMotor2->ChangeControlMode(CANJaguar::kPosition);
 		else if(mode == 5)
 			testMotor2->ChangeControlMode(CANJaguar::kVoltage);
-		break;
+		break; */
 	}	
 }
 
@@ -184,7 +184,7 @@ void FRC::deviceManager::setPositionReference(int CANJag, int reference)
 		else if(reference == 2)
 			armMotor->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
 		break;
-	case 2:
+	/*case 2:
 		if(reference == 1)
 			testMotor1->SetPositionReference(CANJaguar::kPosRef_QuadEncoder);
 		else if(reference == 2)
@@ -195,7 +195,7 @@ void FRC::deviceManager::setPositionReference(int CANJag, int reference)
 			testMotor2->SetPositionReference(CANJaguar::kPosRef_QuadEncoder);
 		else if(reference == 2)
 			testMotor2->SetPositionReference(CANJaguar::kPosRef_Potentiometer);
-		break;
+		break;*/
 	}
 }
 

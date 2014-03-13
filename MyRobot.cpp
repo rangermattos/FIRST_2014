@@ -21,8 +21,7 @@ class RobotDemo : public SimpleRobot
 	FRC::vacManager vacMan;
 	FRC::elevManager elevMan;
 	DriverStation *drive;
-	I2C *wire_read;
-	I2C *wire_write;
+	I2C *wire_i2c;
 	unsigned char datareceived[2];
 	unsigned char datatosend[1];
 	float distance;
@@ -30,7 +29,7 @@ class RobotDemo : public SimpleRobot
 	float speed;
 	bool IsArcade, prevArcade;
 	int CmpP, SpdP;
-	bool status_write, status_trans;
+	bool status_write, status_trans, stat;
 	
 	
 	//DriverStationLCD *display;
@@ -53,6 +52,7 @@ public:
 			//myRobot.SetExpiration(0.1);
 			//devices.startEncoder();
 			devices.startCompressor();
+			wire_i2c = DigitalModule::GetInstance(1)->GetI2C(4);
 			//netMan.connect("10.51.48.50", 1180);
 		}
 
@@ -138,33 +138,38 @@ public:
 			guiMan.print(1, "Vacuum OFF");
 			
         	devices.setPositionReference(1, 2);
-        	
-        	// I2C start-up wire connection
-        	/*
-        	wire_read = DigitalModule::GetInstance(1)->GetI2C(4);
-        	wire_read->SetCompatibilityMode(true);
-        	
-        	wire_write = DigitalModule::GetInstance(1)->GetI2C(5);  // WAS GetI2C(4)
-        	wire_write->SetCompatibilityMode(true);
-        	//conn = wire->AddressOnly();
-        	*/
+        	Timer(t1);
+        	t1.Reset();
+        	t1.Start();
+        	double	t0;
         	
             while (IsOperatorControl())
             {
+            	t0 = t1.Get();
             	//----------START UP----------------------------------------------
             	//----------------------------------------------------------------
             	//----------------------------------------------------------------
             	
             	// I2C read/write commands          	
             	/*
-            	status_write = wire_write->Write(inpMan.getButton(2, 11), 0);
-            	guiMan.print(3, "Print test = 0x%i", inpMan.getButton(2, 11));
-            	guiMan.print(2, "Status write = %i", status_write);
+            	 * green = wire_i2c->Write(3,0x67)
+            	 * red = wire_i2c->Write(0,0x72)
+            	 * temp = wire_i2c->Write(0,0x74); 
+            	 *      = stat = wire_i2c->Transaction(datatosend,0,datarecieved,2);
+            	 * RPM = wire_i2c->Write(0,0x73);
+            	 *     = stat = wire_i2c->Transaction(datatosend,0,datarecieved,1);
+            	 */
+            	// Light up LED based on arm position
+            	printf("I am here\n");
+            	if (devices.getAnalogVoltage(3) >= 2.0)
+            	{
+            		printf("stat = %d\n", wire_i2c->Write(3,0x67)); // sets LED green
+            	}
+            	else
+            	{
+            		printf("stat = %d\n", wire_i2c->Write(0,0x72)); // sets LED red
+            	}
             	
-            	wire_read->Write(4, 12);
-            	wire_read->Transaction(datatosend, 0, datareceived, 1);
-            	guiMan.print(5, "VacT = 0x%ld / 0x50 MAX", datareceived[0]);
-            	*/
             	
             	// Update InputManager
             	inpMan.update();
@@ -283,42 +288,25 @@ public:
                 //------------------GUI PRINTS FOR DRIVER---------------------
                 // Compressor state description
                 if (drive->GetDigitalIn(1))
-                {
                 	CmpP = 2;
-                }
                 else
-                {
                     CmpP = 5;
-                                	
-                }
                 
                 // Shifter state description
                 if (inpMan.getButton(1, 6))
-                {
                 	SpdP = 3;
-                }
                 if (inpMan.getButton(1, 7))
-                {
                 	SpdP = 7;
-                }
                 
                 // Combined compressor shifter state
                 if (SpdP + CmpP == 12)
-                {
                 	guiMan.print(0, "Spd LOW : Cmp OFF");
-                }
                 if (SpdP + CmpP == 8) 
-                {
                 	guiMan.print(0, "Spd HIGH : Cmp OFF");
-                }
                 if (SpdP + CmpP == 5)
-                {
                 	guiMan.print(0, "Spd HIGH : Cmp ON");
-                }
                 if (SpdP + CmpP == 9)
-                {
                 	guiMan.print(0, "Spd LOW : Cmp ON");
-                }
                 
                 //guiMan.print(2, "Left Motor = %f", -inpMan.getMotor(1));
                 //guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
@@ -328,13 +316,15 @@ public:
                 //guiMan.print(4, "Elev Home = %d", devices.getHomeSwitch(1)); //if d doesn't work try i
                 //guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch());
                 guiMan.print(4, "Distance(ft) = %f", devices.getAnalogVoltage(2)*512/60);
-                
+                //guiMan.print(4, "CANJag current = %f", devices.getCANJagCurrent(2));
+                //guiMan.print(5, "CANJag current = %f", devices.getCANJagCurrent(3));
                 
                 //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display
                 guiMan.update();
                 //printf("counter = %i\n", i++);
-                Wait(0.005); // wait for a motor update time
+                Wait(0.1); // wait for a motor update time
+                printf("time = %f\n", t1.Get()-t0);
                         
                }
             

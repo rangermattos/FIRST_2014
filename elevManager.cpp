@@ -7,11 +7,15 @@ FRC::elevManager::elevManager( FRC::deviceManager * devMan, FRC::guiManager * gu
 	devices = devMan;
 	gMan = guiMan;
 	devices->setControlMode(1, 5);
+	//devices->setControlMode(2, 5);
+	//devices->setControlMode(3, 5);
 }
 
 void FRC::elevManager::moveArm( float speed )
 //Used to move the arm. Also invloves height constraints of the arm. 
 {	
+	devices->setCANJag(2,0);
+	devices->setCANJag(3,0);
 	height = devices->getAnalogVoltage(3);
 	float direction = (speed >= 0) ? 1 : -1;
 	//if(height >= MIN_HEIGHT && height <= MAX_HEIGHT)
