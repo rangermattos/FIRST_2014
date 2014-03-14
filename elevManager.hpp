@@ -2,7 +2,6 @@
 #define FRC2014_ELEVMANAGER
 #include "WPILib.h"
 #include "deviceManager.hpp"
-#include "guiManager.hpp"
 
 namespace FRC
 {
@@ -10,12 +9,10 @@ namespace FRC
 	{
 	private:
 		FRC::deviceManager * devices;
-		FRC::guiManager * gMan;
 		float height;
 		
 	public:
-		elevManager( FRC::deviceManager * devMan, FRC::guiManager * guiMan );
-		//void moveElevator( float speed );
+		elevManager( FRC::deviceManager * devMan);
 		void moveArm( float speed );
 		float getHeight();
 		

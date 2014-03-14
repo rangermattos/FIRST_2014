@@ -12,19 +12,16 @@ namespace FRC
         {
         private:
         	Victor drivemotor1, drivemotor2;
-        	Talon vacMotor1, vacMotor2;
+        	//Talon vacMotor1, vacMotor2;
         	AnalogChannel gyro, ultrasonic, armPotHeight;
         	DigitalInput armhomeswitch;
         	Compressor compressor;
         	Solenoid armfire, armrelief, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
         	bool pistonExtended;
         	CANJaguar *armMotor; 
-        	CANJaguar *testMotor1;
-        	CANJaguar *testMotor2;
-        	//Encoder encoder1, encoder2;
-        	//float speed;
-        	//float distance;
-        	//float motorcommand1, motorcommand2;
+        	CANJaguar *vacMotor1;
+        	CANJaguar *vacMotor2;
+
         	
         public:        	
         	///@brief the diffrent driving modes
@@ -41,8 +38,6 @@ namespace FRC
         	void stopCompressor();
         	float getCANJagCurrent(int CANJag);
         	void setCANJag(int CANJag, float value);
-        	void setControlMode(int CanJag, int mode);
-        	void setPositionReference(int CANJag, int reference);
         	double PotPosition();
         	float getAnalogVoltage( int analog );
         	float drivemotor1Control(float speed);

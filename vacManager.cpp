@@ -1,47 +1,28 @@
 #include "vacManager.hpp"
 
-FRC::vacManager::vacManager( FRC::deviceManager * devMan, FRC::guiManager * guiMan ) :
+FRC::vacManager::vacManager( FRC::deviceManager * devMan ) :
 	currentThreshold(25.0)
 {
 	devices = devMan;
-	gMan = guiMan;
-	//devices->setControlMode(2, 5);
-	//devices->setControlMode(3, 5);
-	//bool armReady = false;
 }
 
 void FRC::vacManager::vacuum()
 //Use the CANJaguar current to tell if the ball can be fired.
 {	
-	/*CANJagCurrent1 = devices->getCANJagCurrent(2);
-	CANJagCurrent2 = devices->getCANJagCurrent(3);
-	
-	// debugging : print out both CANJaguar currents
-	gMan->print(4, "%d", CANJagCurrent1);
-	gMan->print(5, "%d", CANJagCurrent2);
-	*/
-	
-	//if(!armReady)
-	//{
-		
-		// arm firing solenoid
-		devices->setSolenoid(1, true);
-		//Wait(0.050);
-		devices->setSolenoid(2, false);	
-		
-		//armReady = true;
-		
-	//}
+	// arm firing solenoid
+	devices->setSolenoid(1, true);
+	devices->setSolenoid(2, false);	
 }
 
-void FRC::vacManager::shoot()
+void FRC::vacManager::shoot(float delay)
 //turns off the vacuum to fire.
 {	
 	// Fire the solenoid, wait then drop vacuum then drop solenoid
 	devices->setSolenoid(1, true);
 	devices->setSolenoid(2, false);
 	
-	Wait(0.5); // Works best so far with this delay
+	//Wait(0.2); // Works best so far with this delay
+	Wait(delay);
 	
 	devices->vacMotor1Control(0);
 	devices->vacMotor2Control(0);

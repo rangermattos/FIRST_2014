@@ -2,7 +2,6 @@
 #define FRC2014_VACMANAGER
 #include "WPILib.h"
 #include "deviceManager.hpp"
-#include "guiManager.hpp"
 
 namespace FRC
 {
@@ -10,16 +9,13 @@ namespace FRC
 	{
 	private:
 		FRC::deviceManager * devices;
-		FRC::guiManager * gMan;
 		float currentThreshold;
-		//float CANJagCurrent1;
-		//float CANJagCurrent2;
 		bool armReady;
 		
 	public:
-		vacManager( FRC::deviceManager * devMan, FRC::guiManager * guiMan );
+		vacManager( FRC::deviceManager * devMan);
 		void vacuum();
-		void shoot();
+		void shoot(float delay);
 	};
 }
 #endif
