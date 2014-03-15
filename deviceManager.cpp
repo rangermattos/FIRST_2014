@@ -151,27 +151,27 @@ float FRC::deviceManager::getAnalogVoltage( int analog )
 	}
 }
 
-float FRC::deviceManager::drivemotor1Control(float speed)
+void FRC::deviceManager::drivemotor1Control(float speed)
 {
 	drivemotor1.SetSpeed(speed);
 }
 
-float FRC::deviceManager::drivemotor2Control(float speed)
+void FRC::deviceManager::drivemotor2Control(float speed)
 {
 	drivemotor2.SetSpeed(speed);
 }
 
-float FRC::deviceManager::vacMotor1Control(float speed)
+void FRC::deviceManager::vacMotor1Control(float speed)
 {
 	vacMotor1->Set(speed, 0);
 }
 
-float FRC::deviceManager::vacMotor2Control(float speed) 
+void FRC::deviceManager::vacMotor2Control(float speed) 
 {
 	vacMotor2->Set(speed, 0);
 }
 
-float FRC::deviceManager::armMotorControl(float speed)
+void FRC::deviceManager::armMotorControl(float speed)
 {
 	armMotor->Set(speed, 0);
 }

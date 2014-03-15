@@ -10,10 +10,12 @@ namespace FRC
 	private:
 		FRC::deviceManager * devices;
 		float height;
+		float threshold;
 		
 	public:
-		elevManager( FRC::deviceManager * devMan);
+		elevManager( FRC::deviceManager * devMan );
 		void moveArm( float speed );
+		void moveArmTo( float value );
 		float getHeight();
 		
 	};

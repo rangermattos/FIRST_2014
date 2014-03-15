@@ -5,6 +5,7 @@
 FRC::elevManager::elevManager( FRC::deviceManager * devMan)
 {
 	devices = devMan;
+	threshold = 0.1f;
 
 }
 
@@ -39,7 +40,24 @@ void FRC::elevManager::moveArm( float speed )
 	}
 }
 
+void FRC::elevManager::moveArmTo( float value )
+{
+	if(value > MAX_HEIGHT)
+		value = MAX_HEIGHT;
+	if(value < MIN_HEIGHT)
+		value = MIN_HEIGHT;
+	height = devices->getAnalogVoltage(3);
+	while(height > (value + threshold))
+	{
+		devices->setCANJag(1, -0.1);
+	}
+	while(height < (value - threshold))
+	{
+		devices->setCANJag(1, 0.1);		
+	}
+}
+
 float FRC::elevManager::getHeight()
 {
-	return height;
+	return height = devices->getAnalogVoltage(3);
 }

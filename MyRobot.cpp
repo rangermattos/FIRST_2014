@@ -5,6 +5,7 @@
 #include "guiManager.hpp"
 #include "vacManager.hpp"
 #include "elevManager.hpp"
+#include "autoManager.hpp"
 #include <string>
 //#include "netManager.hpp"
 /**
@@ -20,6 +21,7 @@ class RobotDemo : public SimpleRobot
 	FRC::guiManager guiMan;
 	FRC::vacManager vacMan;
 	FRC::elevManager elevMan;
+	FRC::autoManager autoMan;
 	DriverStation *drive;
 	I2C *wire_i2c;
 	unsigned char datareceived[2];
@@ -28,6 +30,7 @@ class RobotDemo : public SimpleRobot
 	float angle;
 	float speed;
 	bool IsArcade, prevArcade, vacStatus, vacSpeed;
+	bool inPosition, goodAngle; // autonomous variables
 	int CmpP, SpdP;
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
@@ -41,11 +44,14 @@ public:
 		guiMan(),
 		IsArcade(0), 								// not arcade to start
 		prevArcade(0), 								//previously not arcade
+		inPosition(0),								// not yet in position
+		goodAngle(0),								// not yet at correct angle
 		drive(DriverStation::GetInstance()),
 		//display(DriverStationLCD::GetInstance())
 		//netMan(&guiMan)
 		vacMan(&devices),
-		elevMan(&devices)
+		elevMan(&devices),
+		autoMan(&devices, &elevMan)
 		{
 			//myRobot.SetExpiration(0.1);
 			devices.startCompressor();
@@ -61,55 +67,27 @@ public:
         	devices.startCompressor();
         	devices.vacMotor1Control(0.9);
         	devices.vacMotor2Control(0.9);
+        	guiMan.print(1, "Vacuum ON");
+        	vacStatus = true;
+        	vacSpeed = false;
+        	Wait(1);
         	while (IsAutonomous())
         	{
                 //myRobot.SetSafetyEnabled(false);
-        		distance = devices.getAnalogVoltage(2)*512/5;
-        		while (distance < 48 || distance > 72)
-        		{
-        			distance = devices.getAnalogVoltage(2)*512/5;
-        			if (distance < 48) // less than 48 inches / 4 feet
-        			{
-        				// backwards
-        				speed = -0.021 * distance + 1; // 0.021 = 1/48
-        				speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
-        				speed /= 2;
-        				devices.setSpeed(1, -0.8*speed);
-        				devices.setSpeed(2, speed);
-        			}
-        			else if(distance > 72 ) // more than 72 inches / 6 feet
-        			{
-        				// forwards
-        				speed = 0.021 * (distance-72);
-        				speed = (speed < 1) ? ((speed > -1) ? speed : -1) : 1;
-        				speed /= 2;
-        				devices.setSpeed(1, 0.8*speed);
-        				devices.setSpeed(2, -speed);
-        			}
-        			else 
-        			{
-        				// stopped
-        				speed = 0.0f;
-        				devices.setSpeed(1, speed);
-        				devices.setSpeed(2, speed);
-        			}
-        			Wait(0.005);
-        		}
-        		vacMan.vacuum();
-        		angle = devices.getAnalogVoltage(3);
-        		while (angle > 2.6)
-        		{
-        			angle = devices.getAnalogVoltage(3);
-        			// JASPY COMMENTS: May need to set greater than -1 (-.9???) so it doesn't run past the desired angle
-        			elevMan.moveArm(-1);
-        			Wait(0.005);
-        		}
         		
-        		
-        		if (angle < 2.7) 
+        		//vacMan.vacuum();
+        		        		
+        		if(!autoMan.isAtCorrectPosition() && !autoMan.isAtCorrectAngle())
+        		{
+        			autoMan.correctPosition(60.0f, 6.0f);
+        			autoMan.correctAngle(4.08f, 0.05f);
+        		}
+        		else
+        		{
         			vacMan.shoot(0.2);
+        		}
         		
-        		Wait(0.005); // wait for a motor update time
+        		Wait(0.005);
         	}
         }
 
@@ -226,13 +204,13 @@ public:
                 }
                 
                 // Indicate when the vacuum is up to speed after being activated
-                if (vacStatus == true && devices.getCANJagCurrent(2) >= 19.0)
+                if (vacStatus && devices.getCANJagCurrent(2) >= 19.0)
                 {
                 	vacSpeed = true;
                 }
                 
                 // Once vacuum at speed and active then check that it's pulled suction
-                if (vacStatus == true && vacSpeed == true && devices.getCANJagCurrent(2) <= 15.0)
+                if (vacStatus && vacSpeed && devices.getCANJagCurrent(2) <= 15.0)
                 {
                 	devices.vacMotor1Control(1.0);
                 	devices.vacMotor2Control(1.0);

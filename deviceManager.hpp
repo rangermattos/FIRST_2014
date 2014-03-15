@@ -40,11 +40,11 @@ namespace FRC
         	void setCANJag(int CANJag, float value);
         	double PotPosition();
         	float getAnalogVoltage( int analog );
-        	float drivemotor1Control(float speed);
-        	float drivemotor2Control(float speed);
-        	float vacMotor1Control(float speed);
-        	float vacMotor2Control(float speed);
-        	float armMotorControl(float speed);
+        	void drivemotor1Control(float speed);
+        	void drivemotor2Control(float speed);
+        	void vacMotor1Control(float speed);
+        	void vacMotor2Control(float speed);
+        	void armMotorControl(float speed);
         	int getHomeSwitch(void);
         };
 }
