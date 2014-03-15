@@ -29,6 +29,7 @@ class RobotDemo : public SimpleRobot
 	float speed;
 	bool IsArcade, prevArcade, vacStatus, vacSpeed;
 	int CmpP, SpdP;
+	int Count;
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
 	//netManager netMan;
@@ -133,6 +134,7 @@ public:
 			CmpP = 2;
 			guiMan.print(0, "Spd LOW : Cmp ON");
 			guiMan.print(1, "Vacuum OFF");
+			Count = 0;
 			
         	//devices.setPositionReference(1, 2);
         	Timer(t1);
@@ -150,14 +152,26 @@ public:
             	
             	// I2C read/write commands          	
             	// Light up LED based on arm position
-            	printf("I am here\n");
-            	if (devices.getAnalogVoltage(3) >= 4.0)
+            	/* green = wire_i2c->Write(3,0x67)
+            	 * red = wire_i2c->Write(0,0x72)
+            	 * temp = wire_i2c->Write(0,0x74); 
+            	 *      = stat = wire_i2c->Transaction(datatosend,0,datarecieved,2);
+            	 * RPM = wire_i2c->Write(0,0x73);
+            	 *     = stat = wire_i2c->Transaction(datatosend,0,datarecieved,1);*/
+            	Count = Count++;
+            	if (Count >=20);
             	{
-            		printf("stat = %d\n", wire_i2c->Write(3,0x67)); // sets LED green
-            	}
-            	else
-            	{
-            		printf("stat = %d\n", wire_i2c->Write(0,0x72)); // sets LED red
+            		if (devices.getAnalogVoltage(3) >= 4.0 && devices.getAnalogVoltage(3) <= 4.2)
+            		{
+            			printf("stat = %d\n", wire_i2c->Write(3,0x67)); // sets LED green
+            		}
+            		else
+            		{
+            			printf("stat = %d\n", wire_i2c->Write(0,0x72)); // sets LED red
+            		}
+            		wire_i2c->Write(0,0x74); 
+            		wire_i2c->Transaction(datatosend,0,datareceived,2);
+            		Count = 0;
             	}
             	
             	// Update InputManager
@@ -292,13 +306,15 @@ public:
                 //guiMan.print(4, "CANJag current = %f", devices.getCANJagCurrent(2));
                 //guiMan.print(5, "CANJag current = %f", devices.getCANJagCurrent(3));
                 guiMan.print(5, "Firing delay(s) = %f", 0.5*inpMan.getAxis(2, 4) + 0.5);
+                //guiMan.print(5, "VacT = %ldF", datareceived[0]);
                 printf("CANJag current = %f  %f\n", devices.getCANJagCurrent(2), devices.getCANJagCurrent(3));
+                printf("T1 = %ldF T2 = %ldF\n", datareceived[0], datareceived[1]);
                 
                 //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display
                 guiMan.update();
                 //printf("counter = %i\n", i++);
-                Wait(0.05); // wait for a motor update time
+                Wait(0.005); // wait for a motor update time
                 printf("time = %f\n", t1.Get()-t0);
                         
                }
