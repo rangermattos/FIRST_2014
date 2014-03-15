@@ -6,14 +6,6 @@ FRC::vacManager::vacManager( FRC::deviceManager * devMan ) :
 	devices = devMan;
 }
 
-void FRC::vacManager::vacuum()
-//Use the CANJaguar current to tell if the ball can be fired.
-{	
-	// arm firing solenoid
-	devices->setSolenoid(1, true);
-	devices->setSolenoid(2, false);	
-}
-
 void FRC::vacManager::shoot(float delay)
 //turns off the vacuum to fire.
 {	

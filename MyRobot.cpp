@@ -6,6 +6,7 @@
 #include "vacManager.hpp"
 #include "elevManager.hpp"
 #include "autoManager.hpp"
+#include "NetworkTables/NetworkTable.h"
 #include <string>
 //#include "netManager.hpp"
 /**
@@ -30,9 +31,8 @@ class RobotDemo : public SimpleRobot
 	float angle;
 	float speed;
 	bool IsArcade, prevArcade, vacStatus, vacSpeed;
-	bool inPosition, goodAngle; // autonomous variables
-	int CmpP, SpdP;
-	int Count;
+	bool inPosition, goodAngle, fired; // autonomous variables
+	int CmpP, SpdP, Count, startup;
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
 	//netManager netMan;
@@ -65,29 +65,80 @@ public:
          */
         void Autonomous()
         {
+        	guiMan.clear();
+        	
         	devices.startCompressor();
-        	devices.vacMotor1Control(0.9);
-        	devices.vacMotor2Control(0.9);
-        	guiMan.print(1, "Vacuum ON");
-        	vacStatus = true;
-        	vacSpeed = false;
-        	Wait(1);
+        	startup = 0;
+        	inPosition = false;
+        	goodAngle = false;
+        	fired = false;
+
+        	devices.vacMotor1Control(1.0);
+        	devices.vacMotor2Control(1.0);
+        	
+            //myRobot.SetSafetyEnabled(false);
+        	
+        	// Initial arm solenoid setting
+			devices.setSolenoid(1, false); // arm solenoid
+			devices.setSolenoid(2, true); // arm relief solenoid
+			
+			// Set shifter to low, compressor should be auto-set on
+			devices.setSolenoid(3, true);
+			devices.setSolenoid(4, false);
+			SpdP = 7;
+			CmpP = 2;
+			guiMan.print(0, "Spd LOW : Cmp ON");
+			guiMan.print(1, "Vacuum OFF");
+			
         	while (IsAutonomous())
         	{
+            	inPosition = false;
+            	goodAngle = false;
+        		
+        		if (fired == false)
+        		{
+        			devices.vacMotor1Control(1.0);
+        			devices.vacMotor2Control(1.0);
+        		}
+        		
+        		/*printf("Startup = %i\n", startup);
+        		if (startup == 0)
+        		{
+        			devices.vacMotor1Control(1.0);
+        			devices.vacMotor2Control(1.0);
+        			guiMan.print(1, "Vacuum ON");
+        			//vacStatus = true;
+        			//vacSpeed = false;
+        			guiMan.update();
+        			startup = 1;
+        			//printf("WAIT\n");
+        			//Wait(1.0);
+        		}*/
+        		
+        		// If we are not in the correct position and angle run the following
+        		autoMan.correctPosition(54.0f, 6.0f); // Distance value in inches
+        		autoMan.correctAngle(3.90f, 0.25f); // Angle value in voltage
+        		inPosition = autoMan.isAtCorrectPosition();
+        		goodAngle = autoMan.isAtCorrectAngle();
+
                 //myRobot.SetSafetyEnabled(false);
-        		
-        		//vacMan.vacuum();
+        		//printf("GoodPos = %i  GoodAng = %i\n", inPosition, goodAngle);
         		        		
-        		if(!autoMan.isAtCorrectPosition() && !autoMan.isAtCorrectAngle())
+        		if(inPosition == true && goodAngle == true && fired == false)
         		{
-        			autoMan.correctPosition(60.0f, 6.0f);
-        			autoMan.correctAngle(4.08f, 0.05f);
-        		}
-        		else
-        		{
+        			// Fire
+        			printf("FIRE\n");
         			vacMan.shoot(0.2);
+        			fired = true;
         		}
+
         		
+                // GUI Manager print statements
+                guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(3));
+                guiMan.print(4, "Distance(ft) = %f", devices.getAnalogVoltage(2)*512/60);
+                guiMan.print(5, "Firing delay(s) = %f", 0.5*inpMan.getAxis(2, 4) + 0.5);
+        		
+        		guiMan.update();
         		Wait(0.005);
         	}
         }
@@ -98,14 +149,16 @@ public:
         void OperatorControl()
         {
         	guiMan.clear();
+        	devices.vacMotor1Control(0.0);
+        	devices.vacMotor2Control(0.0);
         	
             //myRobot.SetSafetyEnabled(false);
-        	//int i = 0;
+        	
         	// Initial arm solenoid setting
 			devices.setSolenoid(1, false); // arm solenoid
 			devices.setSolenoid(2, true); // arm relief solenoid
 			
-			// Set shifter to low
+			// Set shifter to low, compressor should be auto-set on
 			devices.setSolenoid(3, true);
 			devices.setSolenoid(4, false);
 			SpdP = 7;
@@ -114,11 +167,15 @@ public:
 			guiMan.print(1, "Vacuum OFF");
 			Count = 0;
 			
-        	//devices.setPositionReference(1, 2);
+			// Timer setup
         	Timer(t1);
         	t1.Reset();
         	t1.Start();
         	double	t0;
+        	
+        	// clear vac status
+        	vacStatus = false;
+        	vacSpeed = false;
         	
             while (IsOperatorControl())
             {
@@ -126,6 +183,7 @@ public:
             	//----------------------------------------------------------------
             	//----------------------------------------------------------------
             	
+            	// Initialize timer
             	t0 = t1.Get();
             	
             	// I2C read/write commands          	
@@ -136,8 +194,9 @@ public:
             	 *      = stat = wire_i2c->Transaction(datatosend,0,datarecieved,2);
             	 * RPM = wire_i2c->Write(0,0x73);
             	 *     = stat = wire_i2c->Transaction(datatosend,0,datarecieved,1);*/
-            	Count = Count++;
-            	if (Count >=20);
+            	
+            	Count++;
+            	if (Count >=200)
             	{
             		if (devices.getAnalogVoltage(3) >= 4.0 && devices.getAnalogVoltage(3) <= 4.2)
             		{
@@ -151,6 +210,11 @@ public:
             		wire_i2c->Transaction(datatosend,0,datareceived,2);
             		Count = 0;
             	}
+            	
+            	// SmartDashboard calls
+            	SmartDashboard::PutNumber("Temp1 F", datareceived[0]);
+            	SmartDashboard::PutNumber("Temp2 F", datareceived[1]);
+            	SmartDashboard::PutNumber("i2c Counter", Count);
             	
             	// Update InputManager
             	inpMan.update();
@@ -187,6 +251,13 @@ public:
                 
                 //----------ARM CONTROL-------------------------------------------
                 elevMan.moveArm(inpMan.getAxis(2, 2)); // Forward back axis of joystick
+                
+                // Push button to automate arm movement
+                if (inpMan.getButton(2, 2))
+                {
+                	autoMan.correctAngle(4.08f, 0.05f);
+                }
+                	
                 
                 //----------MANAGE VACUUM SHOOTING--------------------------------
                 if (inpMan.getButton(2, 5))
@@ -273,27 +344,34 @@ public:
                 if (SpdP + CmpP == 9)
                 	guiMan.print(0, "Spd LOW : Cmp ON");
                 
+                // GUI Manager print statements
+                guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(3));
+                guiMan.print(4, "Distance(ft) = %f", devices.getAnalogVoltage(2)*512/60);
+                guiMan.print(5, "Firing delay(s) = %f", 0.5*inpMan.getAxis(2, 4) + 0.5);
+                
                 //guiMan.print(2, "Left Motor = %f", -inpMan.getMotor(1));
                 //guiMan.print(3, "Right Motor = %f", -inpMan.getMotor(2));
                 //guiMan.print(2, "Elev Axis = %f", inpMan.getElevAxis());
                 //guiMan.print(4, "Arm Axis = %f", inpMan.getAxis(2, 2));
-                guiMan.print(3, "Arm Pot = %f", devices.getAnalogVoltage(3));
                 //guiMan.print(4, "Elev Home = %d", devices.getHomeSwitch(1)); //if d doesn't work try i
                 //guiMan.print(5, "Arm Home = %d", devices.getHomeSwitch());
-                guiMan.print(4, "Distance(ft) = %f", devices.getAnalogVoltage(2)*512/60);
                 //guiMan.print(4, "CANJag current = %f", devices.getCANJagCurrent(2));
                 //guiMan.print(5, "CANJag current = %f", devices.getCANJagCurrent(3));
-                guiMan.print(5, "Firing delay(s) = %f", 0.5*inpMan.getAxis(2, 4) + 0.5);
                 //guiMan.print(5, "VacT = %ldF", datareceived[0]);
-                printf("CANJag current = %f  %f\n", devices.getCANJagCurrent(2), devices.getCANJagCurrent(3));
-                printf("T1 = %ldF T2 = %ldF\n", datareceived[0], datareceived[1]);
+                
+                // NetConsole print statements
+                //printf("CANJag current = %f  %f\n", devices.getCANJagCurrent(2), devices.getCANJagCurrent(3));
+                //printf("T1 = %ldF T2 = %ldF\n", datareceived[0], datareceived[1]);
+                //printf("VacStatus = %i  VacSpeed = %i\n", vacStatus, vacSpeed);
                 
                 //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display
                 guiMan.update();
-                //printf("counter = %i\n", i++);
+                //printf("counter = %i\n", i++); // Everything is okay counter
+                
                 Wait(0.005); // wait for a motor update time
-                printf("time = %f\n", t1.Get()-t0);
+                //printf("time = %f\n", t1.Get()-t0);
+                SmartDashboard::PutNumber("Update rate (s)", t1.Get()-t0);
                         
                }
             
@@ -304,15 +382,11 @@ public:
          */
         void Test() 
         {
-        	// set shifter to low
-        	devices.setSolenoid(1, false); // arm solenoid
-        	devices.setSolenoid(2, true); // arm relief solenoid
-        	devices.setSolenoid(3, true); // 1/2 shifter solenoid
-        	devices.setSolenoid(4, false); // 1/2 shifter solenoid
-        	guiMan.print(0, "Speed low");
+        	// Initialization
         	
         	while (IsTest())
         	{        		
+        		// Main loop
         		
         	}
         }

@@ -1,16 +1,16 @@
 #include "elevManager.hpp"
-#define MAX_HEIGHT 5.0
-#define MIN_HEIGHT 2.5
+#define MAX_HEIGHT 4.4
+#define MIN_HEIGHT 2.35
 
 FRC::elevManager::elevManager( FRC::deviceManager * devMan)
 {
 	devices = devMan;
-	threshold = 0.1f;
+	threshold = 0.1f; // Move to arm threshold
 
 }
 
 void FRC::elevManager::moveArm( float speed )
-//Used to move the arm. Also invloves height constraints of the arm. 
+// Used to move the arm. Also invloves height constraints of the arm. 
 {	
 
 	height = devices->getAnalogVoltage(3);
@@ -42,15 +42,20 @@ void FRC::elevManager::moveArm( float speed )
 
 void FRC::elevManager::moveArmTo( float value )
 {
+	// Check value is within max/min
 	if(value > MAX_HEIGHT)
 		value = MAX_HEIGHT;
 	if(value < MIN_HEIGHT)
 		value = MIN_HEIGHT;
+	
+	// Current arm position
 	height = devices->getAnalogVoltage(3);
+	
 	while(height > (value + threshold))
 	{
-		devices->setCANJag(1, -0.1);
+		devices->setCANJag(1, -0.1); // Current command target is set to %10
 	}
+	
 	while(height < (value - threshold))
 	{
 		devices->setCANJag(1, 0.1);		

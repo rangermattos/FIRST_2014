@@ -17,7 +17,6 @@ namespace FRC
 		void moveArm( float speed );
 		void moveArmTo( float value );
 		float getHeight();
-		
 	};
 }
 

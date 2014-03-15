@@ -14,7 +14,6 @@ namespace FRC
 		
 	public:
 		vacManager( FRC::deviceManager * devMan);
-		void vacuum();
 		void shoot(float delay);
 	};
 }

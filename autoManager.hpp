@@ -20,8 +20,8 @@ namespace FRC
 		
 	public:
 		autoManager( FRC::deviceManager * devMan, FRC::elevManager * elevMan );
-		void correctPosition( float desiredPos, float posThresh );
-		void correctAngle( float desiredAngle, float angleThresh );
+		void correctPosition( float desiredPos, float posThresh);
+		void correctAngle( float desiredAngle, float angleThresh);
 		bool isAtCorrectPosition();
 		bool isAtCorrectAngle();
 	};

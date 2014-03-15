@@ -163,17 +163,17 @@ void FRC::deviceManager::drivemotor2Control(float speed)
 
 void FRC::deviceManager::vacMotor1Control(float speed)
 {
-	vacMotor1->Set(speed, 0);
+	vacMotor1->Set(speed);
 }
 
 void FRC::deviceManager::vacMotor2Control(float speed) 
 {
-	vacMotor2->Set(speed, 0);
+	vacMotor2->Set(speed);
 }
 
 void FRC::deviceManager::armMotorControl(float speed)
 {
-	armMotor->Set(speed, 0);
+	armMotor->Set(speed);
 }
 
 int FRC::deviceManager::getHomeSwitch(void)

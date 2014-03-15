@@ -150,38 +150,3 @@ float FRC::inputManager::getAxis(int joystick, int axis)
 		return 0.0f;
 	}
 }
-
-float FRC::inputManager::Joystick1()
-{
-	return s1.GetY();
-}
-
-float FRC::inputManager::Joystick2()
-{
-	return s1.GetX();
-}
-
-float FRC::inputManager::Joystick3()
-{
-	return s2.GetX();
-}
-
-float FRC::inputManager::Joystick4()
-{
-	return s2.GetY();
-}
-
-float FRC::inputManager::Joystick5()
-{
-	return s3.GetX();
-}
-
-float FRC::inputManager::Joystick6()
-{
-	return s3.GetY();
-}
-
-float FRC::inputManager::Joystick7()
-{
-	return s3.GetRawAxis(6);
-}
