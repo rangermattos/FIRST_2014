@@ -85,7 +85,7 @@ public:
 			// Set shifter to low, compressor should be auto-set on
 			devices.setSolenoid(3, true);
 			devices.setSolenoid(4, false);
-			SpdP = 7;
+			SpdP = 7; //Is there a reason for this?
 			CmpP = 2;
 			guiMan.print(0, "Spd LOW : Cmp ON");
 			guiMan.print(1, "Vacuum OFF");
@@ -99,6 +99,7 @@ public:
         		{
         			devices.vacMotor1Control(1.0);
         			devices.vacMotor2Control(1.0);
+        			printf("loop wait\n");
         		}
         		
         		/*printf("Startup = %i\n", startup);
@@ -161,7 +162,7 @@ public:
 			// Set shifter to low, compressor should be auto-set on
 			devices.setSolenoid(3, true);
 			devices.setSolenoid(4, false);
-			SpdP = 7;
+			SpdP = 7; //Are lines 164 - 166 needed?
 			CmpP = 2;
 			guiMan.print(0, "Spd LOW : Cmp ON");
 			guiMan.print(1, "Vacuum OFF");
@@ -198,7 +199,7 @@ public:
             	Count++;
             	if (Count >=200)
             	{
-            		if (devices.getAnalogVoltage(3) >= 4.0 && devices.getAnalogVoltage(3) <= 4.2)
+            		if (devices.getAnalogVoltage(3) >= 3.8 && devices.getAnalogVoltage(3) <= 4.0)
             		{
             			printf("stat = %d\n", wire_i2c->Write(3,0x67)); // sets LED green
             		}
