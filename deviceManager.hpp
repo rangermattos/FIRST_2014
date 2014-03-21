@@ -13,7 +13,8 @@ namespace FRC
         private:
         	Victor drivemotor1, drivemotor2;
         	//Talon vacMotor1, vacMotor2;
-        	AnalogChannel gyro, ultrasonic, armPotHeight;
+        	Gyro gyro;
+        	AnalogChannel ultrasonic, armPotHeight;
         	DigitalInput armhomeswitch;
         	Compressor compressor;
         	Solenoid armfire, armrelief, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
@@ -46,6 +47,7 @@ namespace FRC
         	void vacMotor2Control(float speed);
         	void armMotorControl(float speed);
         	int getHomeSwitch(void);
+        	void resetGyro(void);
         };
 }
 #endif // FRC2014_GUIMANAGER

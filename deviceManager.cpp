@@ -1,7 +1,7 @@
 #include "deviceManager.hpp"
 #include <iostream>
 FRC::deviceManager::deviceManager() :
-	drivemotor1(1),
+	drivemotor1(3),
 	drivemotor2(2),
 	//vacMotor1(3),
 	//vacMotor2(4),
@@ -18,8 +18,8 @@ FRC::deviceManager::deviceManager() :
 	//encoder1(1, 2, true),
 	//encoder2(1, 2, true),
 	armMotor (new CANJaguar(2)),
-	vacMotor1 (new CANJaguar(3)),
-	vacMotor2 (new CANJaguar(4))
+	vacMotor1  (new CANJaguar(3)),
+	vacMotor2  (new CANJaguar(4))
 {
 
 	//vacMotor1 = new CANJaguar(2);
@@ -141,7 +141,7 @@ float FRC::deviceManager::getAnalogVoltage( int analog )
 	switch(analog)
 	{
 	case 1:
-		return gyro.GetVoltage();
+		return gyro.GetAngle();
 	case 2:
 		return ultrasonic.GetVoltage();
 	case 3:
@@ -178,5 +178,9 @@ void FRC::deviceManager::armMotorControl(float speed)
 
 int FRC::deviceManager::getHomeSwitch(void)
 {
-		return armhomeswitch.Get();
+	return armhomeswitch.Get();
+}
+void FRC::deviceManager::resetGyro(void)
+{
+	gyro.Reset();
 }

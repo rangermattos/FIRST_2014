@@ -14,7 +14,7 @@ void FRC::vacManager::shoot(float delay)
 	devices->setSolenoid(2, false);
 	
 	//Wait(0.2); // Works best so far with this delay
-	Wait(delay);
+	Wait(0.2);
 	
 	devices->vacMotor1Control(0);
 	devices->vacMotor2Control(0);

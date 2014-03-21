@@ -57,7 +57,7 @@ void FRC::inputManager::update()
 	{
 		case MODE_JOY_TANK:
 			m1 = threshold(s1.GetY(), thresh);
-			m2 = threshold(s2.GetY(), thresh);
+			m2 = threshold(s3.GetY(), thresh);
 			break;
         case MODE_JOY_ARCADE:
         	//the max value is 2.0f, and -2.0f, so by dividing by 2.0, limits the input
@@ -119,6 +119,9 @@ bool FRC::inputManager::getButton(int joystick, int button)
 		break;
 	case 2:
 		return s2.GetRawButton(button);
+		break;
+	case 3:
+		return s3.GetRawButton(button);
 		break;
 	default:
 		return false;

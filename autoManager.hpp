@@ -16,6 +16,7 @@ namespace FRC
 		float positionSpeed;
 		float goodAngle, angleTopThreshold, angleBottomThreshold; 
 		float goodPosition, positionTopThreshold, positionBottomThreshold;
+		float gyroCorrection;
 		bool isGoodPosition, isGoodAngle;
 		
 	public:

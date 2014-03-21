@@ -14,27 +14,48 @@ void FRC::autoManager::correctPosition( float desiredPos, float posThresh)
 	positionBottomThreshold = desiredPos - posThresh;
 	position = devices->getAnalogVoltage(2)*512/5; // Distance sensor converted to inches
 
-	if (position < positionBottomThreshold) // below threshold
+	/*if (position < positionBottomThreshold) // below threshold
 	{
 		// Movement backwards required
 		// Set speed equal to the ratio of how close we are from target
-		positionSpeed = -0.021 * position + 1; // 0.021 = 1/48
-		positionSpeed = (positionSpeed < 1) ? ((positionSpeed > -1) ? positionSpeed : -1) : 1;
-		positionSpeed /= 2;
-		devices->setSpeed(1, -0.8*positionSpeed); // speed balance manually adjusted
-		devices->setSpeed(2, positionSpeed);
+		//positionSpeed = -0.021 * position + 1; // 0.021 = 1/48
+		//positionSpeed = (positionSpeed < 1) ? ((positionSpeed > -1) ? positionSpeed : -1) : 1;
+		//positionSpeed /= 2;
+		devices->setSpeed(1, 0.5);//*positionSpeed); // speed balance manually adjusted
+		devices->setSpeed(2, -0.5);//*positionSpeed);
 		
 		isGoodPosition = false;
-	}
-	else if(position > positionTopThreshold) // over threshold
+	}*/
+	if(position > positionTopThreshold) // over threshold
 	{
 		// Movement forward required
 		// Set speed equal to the ratio of how close we are from target
-		positionSpeed = 0.021 * (position-72);
-	    positionSpeed = (positionSpeed < 1) ? ((positionSpeed > -1) ? positionSpeed : -1) : 1;
-	    positionSpeed /= 2;
-	    devices->setSpeed(1, 0.8*positionSpeed); // speed balance manually adjusted
-	    devices->setSpeed(2, -positionSpeed);
+		//positionSpeed = 0.021 * (position-72);
+	    //positionSpeed = (positionSpeed < 1) ? ((positionSpeed > -1) ? positionSpeed : -1) : 1;
+	    //positionSpeed /= 2;
+		
+		// Movement without Gyro
+	    //devices->setSpeed(1, -0.5);//*positionSpeed); // speed balance manually adjusted
+	    //devices->setSpeed(2, 0.4);//*positionSpeed);
+	    
+		// Movement with Gyro
+		gyroCorrection = 2*devices->getAnalogVoltage(1)/90; //gyro correction
+		if (gyroCorrection > 0)
+		{
+			devices->setSpeed(1, -0.5 + 0.5*gyroCorrection);//*positionSpeed); // speed balance manually adjusted
+			devices->setSpeed(2, 0.4);//*positionSpeed);
+		}
+		else if (gyroCorrection < 0)
+		{
+			devices->setSpeed(1, -0.5);//*positionSpeed); // speed balance manually adjusted
+			devices->setSpeed(2, 0.4 + 0.4*gyroCorrection);//*positionSpeed);
+		}
+		else
+		{
+			devices->setSpeed(1, -0.5);//*positionSpeed); // speed balance manually adjusted
+			devices->setSpeed(2, 0.4);//*positionSpeed);
+		}
+	
 	    
 	    isGoodPosition = false;
 	}
@@ -62,13 +83,13 @@ void FRC::autoManager::correctAngle( float desiredAngle, float angleThresh)
 	if (angle > angleTopThreshold)
 	{
 	    // Above threshold, move arm down
-		arm->moveArm(-0.4);
+		arm->moveArm(-0.6);
 		isGoodAngle = false;
 	}
 	else if(angle < angleBottomThreshold)
 	{
 		// Below threshold, move arm up
-		arm->moveArm(0.4);
+		arm->moveArm(0.6);
 		isGoodAngle = false;
 	}
 	else
