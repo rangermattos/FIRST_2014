@@ -113,7 +113,7 @@ public:
         			printf("loop wait\n");
         		}
         		
-        		/*printf("Startup = %i\n", startup);
+        		printf("Startup = %i\n", startup);
         		if (startup == 0)
         		{
         			devices.vacMotor1Control(1.0);
@@ -125,13 +125,13 @@ public:
         			startup = 1;
         			//printf("WAIT\n");
         			//Wait(1.0);
-        		}*/
+        		}
         		
         		// If we are not in the correct position and angle run the following
         		if (fired == false)
         		{
-        			autoMan.correctPosition(64.0f, 6.0f); // Distance value in inches
-        			autoMan.correctAngle(3.90f, 0.25f); // Angle value in voltage
+        			autoMan.correctPosition(72.0f, 6.0f); // Distance value in inches @ 3/21 was 34, 6
+        			autoMan.correctAngle(4.0f, 0.25f); // Angle value in voltage @ 3/21 was 4.2, 0.25
         		}
         		inPosition = autoMan.isAtCorrectPosition();
         		goodAngle = autoMan.isAtCorrectAngle();
@@ -143,6 +143,7 @@ public:
         		{
         			// Fire
         			printf("FIRE\n");
+        			Wait(1.0);
         			vacMan.shoot(0.2);
         			fired = true;
         		}
@@ -154,7 +155,7 @@ public:
                 guiMan.print(5, "Firing delay(s) = %f", 0.5*inpMan.getAxis(2, 4) + 0.5);
         		
         		guiMan.update();
-        		Wait(0.005);
+        		Wait(0.008);
         	}
         }
 
@@ -217,20 +218,30 @@ public:
             	{
             		if (devices.getAnalogVoltage(3) >= 3.8 && devices.getAnalogVoltage(3) <= 4.0)
             		{
-            			printf("stat = %d\n", wire_i2c->Write(3,0x67)); // sets LED green
+            			//printf("stat = %d\n", wire_i2c->Write(3,0x67)); // sets LED green
+            			wire_i2c->Write(3,0x67);
             		}
             		else
             		{
-            			printf("stat = %d\n", wire_i2c->Write(0,0x72)); // sets LED red
+            			//printf("stat = %d\n", wire_i2c->Write(0,0x72)); // sets LED red
+            			wire_i2c->Write(0,0x72);
             		}
             		wire_i2c->Write(0,0x74); 
             		wire_i2c->Transaction(datatosend,0,datareceived,2);
+            		SmartDashboard::PutNumber("Temp1 F", datareceived[0]);
+            		SmartDashboard::PutNumber("Temp2 F", datareceived[1]);
+            		
+            		wire_i2c->Write(0,0x73);
+            		wire_i2c->Transaction(datatosend,0,datareceived,1);
+            		SmartDashboard::PutNumber("Vac Speed", datareceived[0]);
             		Count = 0;
             	}
             	
             	// SmartDashboard calls
-            	SmartDashboard::PutNumber("Temp1 F", datareceived[0]);
-            	SmartDashboard::PutNumber("Temp2 F", datareceived[1]);
+            	SmartDashboard::PutNumber("JAG1", devices.getCANJagCurrent(2));
+            	SmartDashboard::PutNumber("JAG2", devices.getCANJagCurrent(3));
+            	//SmartDashboard::PutNumber("Temp1 F", datareceived[0]);
+            	//SmartDashboard::PutNumber("Temp2 F", datareceived[1]);
             	SmartDashboard::PutNumber("i2c Counter", Count);
             	SmartDashboard::PutNumber("Arm Angle", devices.getAnalogVoltage(3));
             	SmartDashboard::PutNumber("Ultrasonic Distance", devices.getAnalogVoltage(2));
