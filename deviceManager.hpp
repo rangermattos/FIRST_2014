@@ -40,7 +40,7 @@ namespace FRC
         	float getCANJagCurrent(int CANJag);
         	void setCANJag(int CANJag, float value);
         	double PotPosition();
-        	float getAnalogVoltage( int analog );
+        	float getSensorSignal(string analog );
         	void drivemotor1Control(float speed);
         	void drivemotor2Control(float speed);
         	void vacMotor1Control(float speed);

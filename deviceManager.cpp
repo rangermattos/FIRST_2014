@@ -135,19 +135,24 @@ double FRC::deviceManager::PotPosition()
 }
 
 
-float FRC::deviceManager::getAnalogVoltage( int analog )
+float FRC::deviceManager::getSensorSignal(string device)
 //Chooses which analog voltage to display
 {
-	switch(analog)
+	if (device == "gyro")
 	{
-	case 1:
 		return gyro.GetAngle();
-	case 2:
+	}
+	else if (device == "ultrasonic")
+	{
 		return ultrasonic.GetVoltage();
-	case 3:
+	}
+	else if (device == "armPotHieght")
+	{
 		return armPotHeight.GetVoltage();
-	default:
-		break;
+	}
+	else
+	{
+		return 0.0f;
 	}
 }
 

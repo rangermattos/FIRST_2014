@@ -2,7 +2,7 @@
 #define FRC2014_AUTOMANAGER
 #include "WPILib.h"
 #include "deviceManager.hpp"
-#include "elevManager.hpp"
+#include "armManager.hpp"
 
 namespace FRC
 {
@@ -10,19 +10,22 @@ namespace FRC
 	{
 	private:
 		FRC::deviceManager * devices;
-		FRC::elevManager * arm;
+		FRC::armManager * arm;
 		float angle;					// angle of arm
 		float position;					// distance to wall, in inches
 		float positionSpeed;
 		float goodAngle, angleTopThreshold, angleBottomThreshold; 
 		float goodPosition, positionTopThreshold, positionBottomThreshold;
-		float gyroCorrection;
+		float gyroCorrection, prevGyro, currGyro;
+		float proportionalError, integralError;
+		float pGain, iGain;
+		float correctionCommand;
 		bool isGoodPosition, isGoodAngle;
 		
 	public:
-		autoManager( FRC::deviceManager * devMan, FRC::elevManager * elevMan );
-		void correctPosition( float desiredPos, float posThresh);
-		void correctAngle( float desiredAngle, float angleThresh);
+		autoManager( FRC::deviceManager * devMan, FRC::armManager * armMan );
+		void correctPosition( float desiredPos, float posThresh, double deltaT);
+		void correctAngle( float desiredAngle, float angleThresh, double deltaT);
 		bool isAtCorrectPosition();
 		bool isAtCorrectAngle();
 	};

@@ -1,54 +1,39 @@
 #include "autoManager.hpp"
 
-FRC::autoManager::autoManager( FRC::deviceManager * devMan, FRC::elevManager * elevMan )
+FRC::autoManager::autoManager( FRC::deviceManager * devMan, FRC::armManager * armMan )
 {
 	devices = devMan;
-	arm = elevMan;
+	arm = armMan;
 	isGoodPosition = isGoodAngle = false;
+	pGain = 1/45;
+	iGain = 0.1 * pGain;
 }
 
-void FRC::autoManager::correctPosition( float desiredPos, float posThresh)
+void FRC::autoManager::correctPosition( float desiredPos, float posThresh, double deltaT)
 {
 	goodPosition = desiredPos;
 	positionTopThreshold = desiredPos + posThresh;
 	positionBottomThreshold = desiredPos - posThresh;
-	position = devices->getAnalogVoltage(2)*512/5; // Distance sensor converted to inches
+	position = devices->getSensorSignal("ultrasonic")*512/5; // Distance sensor converted to inches
 
-	/*if (position < positionBottomThreshold) // below threshold
-	{
-		// Movement backwards required
-		// Set speed equal to the ratio of how close we are from target
-		//positionSpeed = -0.021 * position + 1; // 0.021 = 1/48
-		//positionSpeed = (positionSpeed < 1) ? ((positionSpeed > -1) ? positionSpeed : -1) : 1;
-		//positionSpeed /= 2;
-		devices->setSpeed(1, 0.5);//*positionSpeed); // speed balance manually adjusted
-		devices->setSpeed(2, -0.5);//*positionSpeed);
-		
-		isGoodPosition = false;
-	}*/
 	if(position > positionTopThreshold) // over threshold
 	{
-		// Movement forward required
-		// Set speed equal to the ratio of how close we are from target
-		//positionSpeed = 0.021 * (position-72);
-	    //positionSpeed = (positionSpeed < 1) ? ((positionSpeed > -1) ? positionSpeed : -1) : 1;
-	    //positionSpeed /= 2;
-		
-		// Movement without Gyro
-	    //devices->setSpeed(1, -0.5);//*positionSpeed); // speed balance manually adjusted
-	    //devices->setSpeed(2, 0.4);//*positionSpeed);
-	    
 		// Movement with Gyro
-		gyroCorrection = 2*devices->getAnalogVoltage(1)/90; //gyro correction
-		if (gyroCorrection > 0)
+		prevGyro = currGyro || devices->getSensorSignal("gyro");
+		currGyro = devices->getSensorSignal("gyro");
+		//gyroCorrection = 2*devices->getSensorSignal("gyro")/90; //gyro correction
+		proportionalError = currGyro - prevGyro;
+		integralError = 0.5 * deltaT * (currGyro + prevGyro);
+		correctionCommand = pGain * proportionalError + iGain * integralError;
+		if (proportionalError > 0)
 		{
-			devices->setSpeed(1, -0.5 + 0.5*gyroCorrection);//*positionSpeed); // speed balance manually adjusted
+			devices->setSpeed(1, -0.5 + 0.5 * correctionCommand);//*positionSpeed); // speed balance manually adjusted
 			devices->setSpeed(2, 0.4);//*positionSpeed);
 		}
-		else if (gyroCorrection < 0)
+		else if (proportionalError < 0)
 		{
 			devices->setSpeed(1, -0.5);//*positionSpeed); // speed balance manually adjusted
-			devices->setSpeed(2, 0.4 + 0.4*gyroCorrection);//*positionSpeed);
+			devices->setSpeed(2, 0.4 + 0.4 * correctionCommand);//*positionSpeed);
 		}
 		else
 		{
@@ -71,13 +56,13 @@ void FRC::autoManager::correctPosition( float desiredPos, float posThresh)
 
 }
 
-void FRC::autoManager::correctAngle( float desiredAngle, float angleThresh)
+void FRC::autoManager::correctAngle( float desiredAngle, float angleThresh, double deltaT)
 {
 	goodAngle = desiredAngle;
 	angleTopThreshold = desiredAngle + angleThresh;
 	angleBottomThreshold = desiredAngle - angleThresh;
 		
-	angle = devices->getAnalogVoltage(3);
+	angle = devices->getSensorSignal("armPotHieght");
 	//printf("Auton angle %f Top = %f Bot = %f\n", angle, angleTopThreshold, angleBottomThreshold);
 	
 	if (angle > angleTopThreshold)

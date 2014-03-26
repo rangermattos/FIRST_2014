@@ -1,18 +1,17 @@
 #include "inputManager.hpp"
-#include <iostream>
 #include <cmath>
+#include <iostream>
+#include <string>
 
 FRC::inputManager::inputManager(float threshold, unsigned char mode) :
-	m1(0),
-	m2(0),
-	s1(1), // xbox
-	s2(2), // xbox
-	s3(3) //joystick
+	commandRight(0),
+	commandLeft(0),
+	s1(1), // joystick
+	s2(2), // joystick
+	s3(3) // joystick
 {
 	thresh = threshold;
-	setMode(mode);
-	enhancedIO = &DriverStation::GetInstance()->GetEnhancedIO();
-
+	setDriveMode(mode);
 }
 
 unsigned char FRC::inputManager::getMode()
@@ -20,14 +19,17 @@ unsigned char FRC::inputManager::getMode()
 {
 	return driveMode;
 }
-void FRC::inputManager::setMode(unsigned char mode)
+
+void FRC::inputManager::setDriveMode(unsigned char mode)
 {
 	driveMode = mode;
 }
+
 inline float clamp(float low, float high, float value)
 {
 	return (value < high) ? ((value > low) ? value : low) : high;
 }
+
 inline float threshold(const float & val, const float & thresh)
 {
 	if((-thresh < val) && (val < thresh))
@@ -56,50 +58,44 @@ void FRC::inputManager::update()
 	switch(driveMode)
 	{
 		case MODE_JOY_TANK:
-			m1 = threshold(s1.GetY(), thresh);
-			m2 = threshold(s3.GetY(), thresh);
+			commandRight = threshold(s1.GetY(), thresh);
+			commandLeft = threshold(s3.GetY(), thresh);
 			break;
         case MODE_JOY_ARCADE:
         	//the max value is 2.0f, and -2.0f, so by dividing by 2.0, limits the input
-        	m1 = threshold(clamp(-1.0f, 1.0f, s1.GetY() + s1.GetX()), thresh);
-        	m2 = threshold(clamp(-1.0f, 1.0f, s1.GetY() - s1.GetX()), thresh);
+        	commandRight = threshold(clamp(-1.0f, 1.0f, s1.GetY() + s1.GetX()), thresh);
+        	commandLeft = threshold(clamp(-1.0f, 1.0f, s1.GetY() - s1.GetX()), thresh);
         	break;
         case MODE_XBOX_TANK:
-        	m2 = threshold(s1.GetY() / 1.0f, thresh);
-        	m1 = threshold(s1.GetRawAxis(5) / 1.0f, thresh);
+        	commandRight = threshold(s1.GetRawAxis(5) / 1.0f, thresh);
+        	commandLeft = threshold(s1.GetY() / 1.0f, thresh);
         	break;
         case MODE_XBOX_ARCADE:
-        	m1 = threshold(clamp(-1.0f, 1.0f, s1.GetY() + s1.GetX()), thresh);
-        	m2 = threshold(clamp(-1.0f, 1.0f, s1.GetY() - s1.GetX()), thresh);
+        	commandRight = threshold(clamp(-1.0f, 1.0f, s1.GetY() + s1.GetX()), thresh);
+        	commandLeft = threshold(clamp(-1.0f, 1.0f, s1.GetY() - s1.GetX()), thresh);
         	break;
-	}
-	float diff = m1 - m2;
-	if((-thresh < diff) && (diff < thresh))
-	{
-		float val = (m1 + m2) / 2.0f;
-		m1 = val;
-		m2 = val;
 	}
 
 }
 	
-float FRC::inputManager::getMotor(int motor)
+float FRC::inputManager::getDriveCommand(string side)
 //returns the values of the motors.
 {
-	switch(motor)
+	if (side == "right")
 	{
-		case 1:
-			return m1;
-			break;
-        case 2:
-        	return m2;
-        	break;
-        default:
-        	return 0.0f;
+		return commandRight;
+	}
+	else if (side == "left")
+	{
+    	return commandLeft;
+	}
+	else
+	{
+        return 0.0f;
 	}
 }
 
-bool FRC::inputManager::getButton(int joystick, int button)
+bool FRC::inputManager::getJoystickButton(int joystick, int button)
 {
 	/*
 	* logitech joystick buttons match indicators
@@ -129,7 +125,7 @@ bool FRC::inputManager::getButton(int joystick, int button)
 		
 }
 
-float FRC::inputManager::getAxis(int joystick, int axis)
+float FRC::inputManager::getJoystickAxis(int joystick, int axis)
 {
 	/*
 	 * axis 1 = left, right

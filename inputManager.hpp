@@ -1,6 +1,9 @@
 #ifndef FRC2014_INPUTMANAGER
 #define FRC2014_INPUTMANAGER
 #include "WPILib.h"
+#include <iostream>
+#include <string>
+
 namespace FRC
 {
         ///@brief a class that will lock the controls, and counter out deadband
@@ -12,11 +15,11 @@ namespace FRC
 	class inputManager
 	{
 		private:
-			float m1, m2;
+			float commandRight, commandLeft;
 			unsigned char driveMode;
 			Joystick s1, s2, s3;
 			float thresh;
-			DriverStationEnhancedIO *enhancedIO;
+
         public:
 			///@brief the different driving modes
 			///
@@ -37,18 +40,12 @@ namespace FRC
 			///@brief returns current drive mode
 			unsigned char getMode();
 			///@brief allows swapping of modes while running, or during configuration
-			void setMode(unsigned char mode);
+			void setDriveMode(unsigned char mode);
 			///@brief get the motor, either side one or side two
-			float getMotor(int motor);
+			float getDriveCommand(string side);
 			///@brief get the z-axis data off of the primary joystick
-			float getZ(void);
-			///@brief
-			float getElevAxis(void);
-			///@brief
-			float getArmAxis(void);
-			///@brief get joystick button status
-			bool getButton(int joystick, int button);
-			float getAxis(int joystick, int axis);
+			bool getJoystickButton(int joystick, int button);
+			float getJoystickAxis(int joystick, int axis);
 	};
 }
 #endif // FRC2014_INPUTMANAGER

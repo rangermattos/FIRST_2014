@@ -1,11 +1,11 @@
-#ifndef FRC2014_ELEVMANAGER
-#define FRC2014_ELEVMANAGER
+#ifndef FRC2014_ARMVMANAGER
+#define FRC2014_ARMVMANAGER
 #include "WPILib.h"
 #include "deviceManager.hpp"
 
 namespace FRC
 {
-	class elevManager
+	class armManager
 	{
 	private:
 		FRC::deviceManager * devices;
@@ -13,7 +13,7 @@ namespace FRC
 		float threshold;
 		
 	public:
-		elevManager( FRC::deviceManager * devMan );
+		armManager( FRC::deviceManager * devMan );
 		void moveArm( float speed );
 		void moveArmTo( float value );
 		float getHeight();
