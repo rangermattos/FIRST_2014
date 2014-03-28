@@ -12,14 +12,16 @@ namespace FRC
 		FRC::deviceManager * devices;
 		FRC::armManager * arm;
 		float angle;					// angle of arm
+		float angleSpeed;
 		float position;					// distance to wall, in inches
 		float positionSpeed;
 		float goodAngle, angleTopThreshold, angleBottomThreshold; 
 		float goodPosition, positionTopThreshold, positionBottomThreshold;
 		float gyroCorrection, prevGyro, currGyro;
-		float proportionalError, integralError;
-		float pGain, iGain;
-		float correctionCommand;
+		float prevAngle;
+		float proportionalErrorPos, integralErrorPos, proportionalErrorAngle, integralErrorAngle;
+		float pGainPos, iGainPos, pGainAngle, iGainAngle;
+		float correctionCommandPos, correctionCommandAngle;
 		bool isGoodPosition, isGoodAngle;
 		
 	public:

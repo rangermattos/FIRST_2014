@@ -5,8 +5,10 @@ FRC::autoManager::autoManager( FRC::deviceManager * devMan, FRC::armManager * ar
 	devices = devMan;
 	arm = armMan;
 	isGoodPosition = isGoodAngle = false;
-	pGain = 1/45;
-	iGain = 0.1 * pGain;
+	pGainPos = 1/45;
+	iGainPos = 0.1 * pGainPos;
+	pGainAngle = 0.1; 
+	iGainAngle = 0.001; // change value at some point
 }
 
 void FRC::autoManager::correctPosition( float desiredPos, float posThresh, double deltaT)
@@ -16,24 +18,28 @@ void FRC::autoManager::correctPosition( float desiredPos, float posThresh, doubl
 	positionBottomThreshold = desiredPos - posThresh;
 	position = devices->getSensorSignal("ultrasonic")*512/5; // Distance sensor converted to inches
 
-	if(position > positionTopThreshold) // over threshold
+	if(position > positionTopThreshold || position < positionBottomThreshold) // over or under threshold
 	{
 		// Movement with Gyro
 		prevGyro = currGyro || devices->getSensorSignal("gyro");
 		currGyro = devices->getSensorSignal("gyro");
 		//gyroCorrection = 2*devices->getSensorSignal("gyro")/90; //gyro correction
-		proportionalError = currGyro - prevGyro;
-		integralError = 0.5 * deltaT * (currGyro + prevGyro);
-		correctionCommand = pGain * proportionalError + iGain * integralError;
-		if (proportionalError > 0)
+		proportionalErrorPos = currGyro - prevGyro;
+		
+		//use trapezoid to calculate integral
+		integralErrorPos = 0.5 * deltaT * (currGyro + prevGyro);
+		
+		correctionCommandPos = pGainPos * proportionalErrorPos + iGainPos * integralErrorPos;
+		
+		if (proportionalErrorPos > 0)
 		{
-			devices->setSpeed(1, -0.5 + 0.5 * correctionCommand);//*positionSpeed); // speed balance manually adjusted
+			devices->setSpeed(1, -0.5 + 0.5 * correctionCommandPos);//*positionSpeed); // speed balance manually adjusted
 			devices->setSpeed(2, 0.4);//*positionSpeed);
 		}
-		else if (proportionalError < 0)
+		else if (proportionalErrorPos < 0)
 		{
 			devices->setSpeed(1, -0.5);//*positionSpeed); // speed balance manually adjusted
-			devices->setSpeed(2, 0.4 + 0.4 * correctionCommand);//*positionSpeed);
+			devices->setSpeed(2, 0.4 + 0.4 * correctionCommandPos);//*positionSpeed);
 		}
 		else
 		{
@@ -60,26 +66,31 @@ void FRC::autoManager::correctAngle( float desiredAngle, float angleThresh, doub
 {
 	goodAngle = desiredAngle;
 	angleTopThreshold = desiredAngle + angleThresh;
-	angleBottomThreshold = desiredAngle - angleThresh;
-		
+	angleBottomThreshold = desiredAngle - angleThresh;	
 	angle = devices->getSensorSignal("armPotHieght");
 	//printf("Auton angle %f Top = %f Bot = %f\n", angle, angleTopThreshold, angleBottomThreshold);
 	
-	if (angle > angleTopThreshold)
+	if(angle > angleTopThreshold || angle < angleBottomThreshold) // over or under threshold
 	{
-	    // Above threshold, move arm down
-		arm->moveArm(-0.6);
-		isGoodAngle = false;
+		// angle movement
+		prevAngle = angle;
+		proportionalErrorAngle = angle - goodAngle;
+		
+		// use trapezoid to calculate integral
+		integralErrorAngle = 0.5 * deltaT * (angle + prevAngle);
+		
+		correctionCommandAngle = pGainAngle * proportionalErrorAngle + iGainAngle * integralErrorAngle;
+		
+		arm->moveArm(correctionCommandAngle);	
+	    
+	    isGoodAngle = false;
 	}
-	else if(angle < angleBottomThreshold)
+	else 
 	{
-		// Below threshold, move arm up
-		arm->moveArm(0.6);
-		isGoodAngle = false;
-	}
-	else
-	{
-		arm->moveArm(0.0);
+		// Robot is within the correct angle threshold
+		angleSpeed = 0.0f;
+		arm->moveArm(angleSpeed);
+		
 		isGoodAngle = true;
 	}
 	
