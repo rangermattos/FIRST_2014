@@ -25,19 +25,6 @@ void FRC::inputManager::setDriveMode(unsigned char mode)
 	driveMode = mode;
 }
 
-/*inline float clamp(float low, float high, float value)
-{
-	return (value < high) ? ((value > low) ? value : low) : high;
-}*/
-
-inline float threshold(const float & val, const float & thresh)
-{
-	if((-thresh < val) && (val < thresh))
-		return 0;
-	else
-		return val;
-}
-
 float FRC::inputManager::rateLimit( float newVal, float prevVal, float rate )
 {
 	float out;

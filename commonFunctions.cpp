@@ -13,3 +13,13 @@ float FRC::clamp(float low, float high, float value)
 	
 	return output;
 }
+
+float FRC::threshold(float val, float thresh)
+{
+	float output;
+	
+	if((-thresh < val) && (val < thresh))
+		output = 0;
+	else
+		output = val;
+}
