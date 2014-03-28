@@ -30,6 +30,9 @@ void FRC::autoManager::correctPosition( float desiredPos, float posThresh, doubl
 		integralErrorPos = 0.5 * deltaT * (currGyro + prevGyro);
 		
 		correctionCommandPos = pGainPos * proportionalErrorPos + iGainPos * integralErrorPos;
+		// print for debugging
+		printf("correctionCommandPos: %f", correctionCommandPos);
+		correctionCommandPos= clamp(-1, 1, correctionCommandPos);
 		
 		if (proportionalErrorPos > 0)
 		{
@@ -80,6 +83,9 @@ void FRC::autoManager::correctAngle( float desiredAngle, float angleThresh, doub
 		integralErrorAngle = 0.5 * deltaT * (angle + prevAngle);
 		
 		correctionCommandAngle = pGainAngle * proportionalErrorAngle + iGainAngle * integralErrorAngle;
+		// print for debugging
+		printf("correctionCommandAngle: %f", correctionCommandAngle);
+		correctionCommandAngle = clamp(-1, 1, correctionCommandAngle);
 		
 		arm->moveArm(correctionCommandAngle);	
 	    

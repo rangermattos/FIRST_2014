@@ -7,6 +7,7 @@
 #include "armManager.hpp"
 #include "autoManager.hpp"
 #include "NetworkTables/NetworkTable.h"
+#include "commonFunctions.hpp"
 #include <iostream>
 #include <string>
 

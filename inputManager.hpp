@@ -3,6 +3,7 @@
 #include "WPILib.h"
 #include <iostream>
 #include <string>
+#include "commonFunctions.hpp"
 
 namespace FRC
 {

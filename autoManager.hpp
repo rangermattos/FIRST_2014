@@ -3,6 +3,7 @@
 #include "WPILib.h"
 #include "deviceManager.hpp"
 #include "armManager.hpp"
+#include "commonFunctions.hpp"
 
 namespace FRC
 {
