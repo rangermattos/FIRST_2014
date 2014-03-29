@@ -1,71 +1,86 @@
 <xml version="1.0">
 <dashboard>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.Label">
+		<location x="529" y="117"/>
+		<property name="Text" value="Smart Dashboard Connection"/>
+	</static-widget>
 	<widget field="Vac Speed" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
 		<location x="530" y="230"/>
-		<property name="Maximum" value="700.0"/>
-	</widget>
-	<widget field="JAG2" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
-		<location x="529" y="266"/>
-		<property name="Maximum" value="25.0"/>
-	</widget>
-	<widget field="JAG1" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
-		<location x="530" y="299"/>
-		<property name="Maximum" value="25.0"/>
 	</widget>
 	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.Label">
-		<location x="746" y="427"/>
-		<property name="Text" value="Jag 1 Tempature"/>
+		<location x="1044" y="231"/>
+		<property name="Text" value="Gyro [Degrees]"/>
+	</static-widget>
+	<widget field="Gyro" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.SimpleDial">
+		<location x="954" y="248"/>
+		<width>258</width>
+		<height>169</height>
+		<property name="Upper Limit" value="180.0"/>
+		<property name="Lower Limit" value="-180.0"/>
+		<property name="Tick Interval" value="30.0"/>
+	</widget>
+	<widget field="Temp2 F" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.SimpleDial">
+		<location x="393" y="320"/>
+		<width>223</width>
+	</widget>
+	<widget field="JAG1 Current" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
+		<location x="530" y="261"/>
+		<property name="Foreground" value="0.0.255.255"/>
+	</widget>
+	<widget field="JAG2 Current" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
+		<location x="530" y="292"/>
+		<property name="Foreground" value="51.51.255.255"/>
+	</widget>
+	<widget field="deltaT (s)" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="548" y="168"/>
+		<width>121</width>
+	</widget>
+	<widget field="Ultrasonic Distance" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="17" y="344"/>
+	</widget>
+	<widget field="Update rate (s)" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="520" y="146"/>
+		<width>149</width>
+	</widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.Label">
+		<location x="676" y="474"/>
+		<property name="Text" value="Jag 1 Temp [F]"/>
 	</static-widget>
 	<widget field="Temp1 F" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.SimpleDial">
-		<location x="672" y="449"/>
+		<location x="593" y="321"/>
 		<width>229</width>
 	</widget>
 	<widget field="i2c Counter" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="529" y="359"/>
+		<location x="539" y="190"/>
 		<width>130</width>
 		<height>23</height>
 	</widget>
-	<widget field="Ultrasonic Distance" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
-		<location x="17" y="344"/>
-		<width>228</width>
-		<height>188</height>
-		<property name="Buffer Size (samples)" value="100"/>
-	</widget>
 	<widget field="Ready to Fire" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
-		<location x="17" y="535"/>
-		<width>231</width>
-		<height>156</height>
+		<location x="10" y="417"/>
+		<width>261</width>
+		<height>187</height>
 	</widget>
 	<widget field="Arm Angle" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="209" y="708"/>
+		<location x="59" y="366"/>
 	</widget>
 	<widget field="Shifter High" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
-		<location x="981" y="536"/>
-		<width>239</width>
-		<height>170</height>
-	</widget>
-	<widget field="Update rate (s)" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.LinePlot">
-		<location x="454" y="18"/>
-		<width>256</width>
-		<height>183</height>
-		<property name="Buffer Size (samples)" value="100"/>
+		<location x="994" y="431"/>
+		<width>252</width>
+		<height>191</height>
 	</widget>
 	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.Label">
-		<location x="355" y="426"/>
+		<location x="453" y="477"/>
 		<width>105</width>
-		<property name="Text" value="Jag 2 Tempature"/>
+		<property name="Text" value="Jag 2 Temp [F]"/>
 	</static-widget>
-	<widget field="Temp2 F" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.SimpleDial">
-		<location x="291" y="455"/>
-		<width>227</width>
-	</widget>
-	<widget field="Gyro" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.Compass">
-		<location x="471" y="448"/>
-	</widget>
 	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
-		<location x="909" y="594"/>
+		<location x="522" y="114"/>
+		<width>154</width>
+		<height>22</height>
 	</static-widget>
 </dashboard>
 <live-window>
 </live-window>
+	<hidden field="JAG2"/>
+	<hidden field="JAG1"/>
 </xml>

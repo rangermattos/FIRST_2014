@@ -141,10 +141,12 @@ float FRC::deviceManager::getSensorSignal(string device)
 	if (device == "gyro")
 	{
 		return gyro.GetAngle();
+		//return gyro.GetVoltage();
 	}
 	else if (device == "ultrasonic")
 	{
-		return ultrasonic.GetVoltage();
+		//return ultrasonic.GetVoltage();
+		return ultrasonic.GetAverageVoltage()*512/60;
 	}
 	else if (device == "armPotHieght")
 	{

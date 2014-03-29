@@ -28,7 +28,7 @@ namespace FRC
 	public:
 		autoManager( FRC::deviceManager * devMan, FRC::armManager * armMan );
 		void correctPosition( float desiredPos, float posThresh, double deltaT);
-		void correctAngle( float desiredAngle, float angleThresh, double deltaT);
+		void correctAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall);
 		bool isAtCorrectPosition();
 		bool isAtCorrectAngle();
 	};

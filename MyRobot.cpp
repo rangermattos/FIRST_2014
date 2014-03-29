@@ -38,6 +38,7 @@ class RobotDemo : public SimpleRobot
 	int CmpP, SpdP, Count; // robot state variable indicators
 	Timer(t1); // timer for loop
 	double prevTime, currTime, deltaT; // stores previous, current, change in time for loop
+	bool firstCallIndicator; // used to clear the error integration function for the automative moves
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
 	//netManager netMan;
@@ -58,7 +59,8 @@ public:
 		//netMan(&guiMan)
 		vacMan(&devices),
 		armMan(&devices),
-		autoMan(&devices, &armMan)
+		autoMan(&devices, &armMan),
+		firstCallIndicator(0)
 		{
 			//myRobot.SetExpiration(0.1);
 			devices.startCompressor();
@@ -91,6 +93,7 @@ public:
 			devices.setSolenoid(3, false);
 			devices.setSolenoid(4, true);
 			SmartDashboard::PutBoolean("Shifter High", true);
+			
 			guiMan.print(0, "Spd LOW : Cmp ON");
 			guiMan.print(1, "Vacuum ON");
 			
@@ -100,39 +103,51 @@ public:
 			// initialize timer
 			t1.Reset();
 			t1.Start();
+			prevTime = -1.0;
 			
         	while (IsAutonomous())
         	{
-        		//set initial prevTime unless currTime is set
-        		prevTime = currTime || t1.Get();
+        		// set initial prevTime unless currTime is set
+        		prevTime = (prevTime < 0) ? t1.Get() : currTime;
     			currTime = t1.Get();
     			deltaT = currTime - prevTime;
         		
-        		//SMART DASHBOARD COMMANDS
+        		// SMART DASHBOARD COMMANDS
             	SmartDashboard::PutNumber("Temp1 F", datareceived[0]);
             	SmartDashboard::PutNumber("Temp2 F", datareceived[1]);
+            	SmartDashboard::PutNumber("JAG1 Current", devices.getCANJagCurrent(2));
+            	SmartDashboard::PutNumber("JAG2 Current", devices.getCANJagCurrent(3));
             	SmartDashboard::PutNumber("i2c Counter", Count);
             	SmartDashboard::PutNumber("Arm Angle", devices.getSensorSignal("armPotHieght"));
             	SmartDashboard::PutNumber("Gyro", devices.getSensorSignal("gyro"));
+            	SmartDashboard::PutNumber("Ultrasonic Distance", devices.getSensorSignal("ultrasonic"));
             	
             	inPosition = false;
             	goodAngle = false;
         		
         		if (fired == false)
         		{
+
         			devices.vacMotor1Control(1.0);
         			devices.vacMotor2Control(1.0);
-        			printf("loop wait\n");
+        			//printf("loop wait\n");
         		}
         		
         		// If we are not in the correct position and angle run the following
         		if (fired == false)
         		{
-        			autoMan.correctPosition(72.0f, 6.0f, deltaT); // Distance value in inches @ 3/21 was 34, 6
-        			autoMan.correctAngle(4.0f, 0.25f, deltaT); // Angle value in voltage @ 3/21 was 4.2, 0.25
+        			autoMan.correctPosition(4.5f, 0.5f, deltaT); // Distance value in inches @ 3/21 was 34, 6
+        			
+        			// Angle value in voltage @ 3/21 was 4.2, 0.25
+        			autoMan.correctAngle(4.1f, 0.1f, deltaT, !firstCallIndicator);
+                    if (!firstCallIndicator)
+                    	firstCallIndicator = true;
+                    
         		}
         		inPosition = autoMan.isAtCorrectPosition();
         		goodAngle = autoMan.isAtCorrectAngle();
+        		
+        		//printf("Pos = %i  Ang = %i\n", inPosition, goodAngle);
 
                 //myRobot.SetSafetyEnabled(false);
         		
@@ -147,11 +162,14 @@ public:
 
                 // GUI Manager print statements
                 guiMan.print(3, "Arm Pot = %f", devices.getSensorSignal("armPotHieght"));
-                guiMan.print(4, "Distance(ft) = %f", devices.getSensorSignal("ultrasonic")*512/60);
+                guiMan.print(4, "Distance(ft) = %f", devices.getSensorSignal("ultrasonic"));
                 guiMan.print(5, "Firing delay(s) = %f", 0.5*inpMan.getJoystickAxis(2, 4) + 0.5);
         		
         		guiMan.update();
         		Wait(0.008);
+        		SmartDashboard::PutNumber("Update rate (s)", t1.Get()-prevTime);
+        		SmartDashboard::PutNumber("deltaT (s)", deltaT);
+        		
         	}
         }
 
@@ -180,14 +198,20 @@ public:
 			guiMan.print(1, "Vacuum OFF");
 			Count = 0;
 			
+			// REMOTE TEST CODE WPT 03/29/14 reset gyro before match
+			devices.resetGyro();
+			
 			// Timer setup
         	//Timer(t1);
         	t1.Reset();
         	t1.Start();
+        	prevTime = -1.0;
         	
         	// clear vac status
         	vacStatus = false;
         	vacSpeed = false;
+        	
+        	firstCallIndicator = false;
         	
             while (IsOperatorControl())
             {
@@ -195,8 +219,10 @@ public:
             	//----------------------------------------------------------------
             	//----------------------------------------------------------------
             	
-            	// Initialize timer
-            	prevTime = t1.Get();
+            	//set initial prevTime unless currTime is set
+            	prevTime = (prevTime < 0) ? t1.Get() : currTime;
+            	currTime = t1.Get();
+            	deltaT = currTime - prevTime;
             	
             	// I2C read/write commands          	
             	// Light up LED based on arm position
@@ -208,9 +234,9 @@ public:
             	 *     = stat = wire_i2c->Transaction(datatosend,0,datarecieved,1);*/
             	
             	Count++;
-            	if (Count >=200)
+            	if (Count >=10)
             	{
-            		if (devices.getSensorSignal("armPotHieght") >= 3.8 && devices.getSensorSignal("armPotHieght") <= 4.0)
+            		if (devices.getSensorSignal("armPotHieght") >= 4.0 && devices.getSensorSignal("armPotHieght") <= 4.2)
             		{
             			//printf("stat = %d\n", wire_i2c->Write(3,0x67)); // sets LED green
             			wire_i2c->Write(3,0x67);
@@ -232,14 +258,13 @@ public:
             	}
             	
             	// SmartDashboard calls
-            	SmartDashboard::PutNumber("JAG1", devices.getCANJagCurrent(2));
-            	SmartDashboard::PutNumber("JAG2", devices.getCANJagCurrent(3));
-            	//SmartDashboard::PutNumber("Temp1 F", datareceived[0]);
-            	//SmartDashboard::PutNumber("Temp2 F", datareceived[1]);
+            	SmartDashboard::PutNumber("JAG1 Current", devices.getCANJagCurrent(2));
+            	SmartDashboard::PutNumber("JAG2 Current", devices.getCANJagCurrent(3));
             	SmartDashboard::PutNumber("i2c Counter", Count);
             	SmartDashboard::PutNumber("Arm Angle", devices.getSensorSignal("armPotHieght"));
             	SmartDashboard::PutNumber("Ultrasonic Distance", devices.getSensorSignal("ultrasonic"));
-            	if (3.8 <= devices.getSensorSignal("armPotHieght") && devices.getSensorSignal("armPotHieght") <= 4.0 /*&& 4.2 <= devices.getSensorSignal("ultrasonic") <= 4.4*/)
+            	SmartDashboard::PutNumber("Gyro", devices.getSensorSignal("gyro"));
+            	if (3.8 <= devices.getSensorSignal("armPotHieght") && devices.getSensorSignal("armPotHieght") <= 4.0 /*&& 4.2 <= devices.getSensorSignal("ultrasonic") <= 4.4*/)	
             	{
             		SmartDashboard::PutBoolean("Ready to Fire", true);
         		}
@@ -247,7 +272,6 @@ public:
             	{
             		SmartDashboard::PutBoolean("Ready to Fire", false);
             	}
-            	SmartDashboard::PutNumber("Gyro", devices.getSensorSignal("gyro"));
             	
             	// Update InputManager
             	inpMan.update();
@@ -284,9 +308,22 @@ public:
                 armMan.moveArm(inpMan.getJoystickAxis(2, 2)); // Forward back axis of joystick
                 
                 // Push button to automate arm movement
-                if (inpMan.getJoystickButton(2, 2))
+                if (inpMan.getJoystickButton(2, 2) || inpMan.getJoystickButton(2, 4)) 
                 {
-                	autoMan.correctAngle(3.95f, 0.05f, deltaT);
+                	if (inpMan.getJoystickButton(2, 2) == true)
+                	{
+                		autoMan.correctAngle(4.1f, 0.1f, deltaT, !firstCallIndicator);
+                	}
+                	else
+                	{
+                		autoMan.correctAngle(2.29f, 0.1f, deltaT, !firstCallIndicator);
+                	}
+                	if (!firstCallIndicator)
+                	   	firstCallIndicator = true;
+                }
+                else
+                {
+                	firstCallIndicator = false;
                 }
                 
                 //----------MANAGE VACUUM SHOOTING--------------------------------
@@ -312,7 +349,7 @@ public:
                 if (inpMan.getJoystickButton(2, 1))
                 {                	
                 	guiMan.print(2, "Solenoid FIRED");
-                	vacMan.shoot(0.5*inpMan.getJoystickAxis(2, 4) + 0.5);
+                	vacMan.shoot(0.2); //0.5*inpMan.getJoystickAxis(2, 4) + 0.5);
                 	guiMan.print(2, "Solenoid RESET");
                 	vacStatus = false;
                 	vacSpeed = false;
@@ -361,13 +398,14 @@ public:
                 
                 // GUI Manager print statements
                 guiMan.print(3, "Arm Pot = %f", devices.getSensorSignal("armPotHieght"));
-                guiMan.print(4, "Distance(ft) = %f", devices.getSensorSignal("ultrasonic")*512/60);
+                guiMan.print(4, "Distance(ft) = %f", devices.getSensorSignal("ultrasonic"));
                 
                 //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display
                 guiMan.update();                
-                Wait(0.008); // wait for a motor update time
+                Wait(0.01); // wait for a motor update time
                 SmartDashboard::PutNumber("Update rate (s)", t1.Get()-prevTime);
+                SmartDashboard::PutNumber("deltaT (s)", deltaT);
                         
                }
             
