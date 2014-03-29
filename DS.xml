@@ -62,6 +62,9 @@
 	<widget field="Gyro" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.Compass">
 		<location x="471" y="448"/>
 	</widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.ConnectionIndicator">
+		<location x="909" y="594"/>
+	</static-widget>
 </dashboard>
 <live-window>
 </live-window>
