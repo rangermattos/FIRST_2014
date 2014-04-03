@@ -1,5 +1,24 @@
 <xml version="1.0">
 <dashboard>
+	<widget field="Move Back" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="1016" y="158"/>
+		<width>175</width>
+		<height>34</height>
+		<property name="Color to show when true" value="0.0.255.255"/>
+		<property name="Color to show when false" value="153.153.153.255"/>
+	</widget>
+	<widget field="Move Closer" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="1017" y="73"/>
+		<width>183</width>
+		<height>32</height>
+		<property name="Color to show when true" value="0.0.255.255"/>
+		<property name="Color to show when false" value="153.153.153.255"/>
+	</widget>
+	<widget field="Correct Distance" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="1016" y="115"/>
+		<width>204</width>
+		<height>32</height>
+	</widget>
 	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.Label">
 		<location x="529" y="117"/>
 		<property name="Text" value="Smart Dashboard Connection"/>
@@ -81,6 +100,4 @@
 </dashboard>
 <live-window>
 </live-window>
-	<hidden field="JAG2"/>
-	<hidden field="JAG1"/>
 </xml>

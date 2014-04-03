@@ -17,9 +17,11 @@ void FRC::vacManager::shoot(float delay)
 	//Wait(0.2);
 	Wait(delay);
 	
+	// Turn off vacs to allow vac behind ball to drop
 	devices->vacMotor1Control(0);
 	devices->vacMotor2Control(0);
 			
+	// Allow time for the ball to fire before dropping the solenoids back down
 	Wait(1.0);
 			
 	devices->setSolenoid(1, false);

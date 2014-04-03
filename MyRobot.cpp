@@ -224,6 +224,11 @@ public:
             	currTime = t1.Get();
             	deltaT = currTime - prevTime;
             	
+            	
+            	//----------I2C COMMS---------------------------------------------
+            	//----------------------------------------------------------------
+            	//----------------------------------------------------------------
+            	
             	// I2C read/write commands          	
             	// Light up LED based on arm position
             	/* green = wire_i2c->Write(3,0x67)
@@ -233,6 +238,7 @@ public:
             	 * RPM = wire_i2c->Write(0,0x73);
             	 *     = stat = wire_i2c->Transaction(datatosend,0,datarecieved,1);*/
             	
+            	// I2C Wait to Send function
             	Count++;
             	if (Count >=10)
             	{
@@ -247,12 +253,14 @@ public:
             			wire_i2c->Write(0,0x72);
             		}
             		wire_i2c->Write(0,0x74); 
-            		wire_i2c->Transaction(datatosend,0,datareceived,2);
+            		//wire_i2c->Transaction(datatosend,0,datareceived,2);
+            		printf("i2c Temp Connection %i\n", wire_i2c->Transaction(datatosend,0,datareceived,2));
             		SmartDashboard::PutNumber("Temp1 F", datareceived[0]);
             		SmartDashboard::PutNumber("Temp2 F", datareceived[1]);
             		
             		wire_i2c->Write(0,0x73);
-            		wire_i2c->Transaction(datatosend,0,datareceived,1);
+            		//wire_i2c->Transaction(datatosend,0,datareceived,1);
+            		printf("i2c Speed Connection %i\n", wire_i2c->Transaction(datatosend,0,datareceived,1));
             		SmartDashboard::PutNumber("Vac Speed", datareceived[0]);
             		Count = 0;
             	}
@@ -264,21 +272,38 @@ public:
             	SmartDashboard::PutNumber("Arm Angle", devices.getSensorSignal("armPotHieght"));
             	SmartDashboard::PutNumber("Ultrasonic Distance", devices.getSensorSignal("ultrasonic"));
             	SmartDashboard::PutNumber("Gyro", devices.getSensorSignal("gyro"));
-            	if (3.8 <= devices.getSensorSignal("armPotHieght") && devices.getSensorSignal("armPotHieght") <= 4.0 /*&& 4.2 <= devices.getSensorSignal("ultrasonic") <= 4.4*/)	
-            	{
-            		SmartDashboard::PutBoolean("Ready to Fire", true);
-        		}
-            	else
-            	{
-            		SmartDashboard::PutBoolean("Ready to Fire", false);
-            	}
             	
-            	// Update InputManager
-            	inpMan.update();
+            	// Correct Arm Position Indicator
+            	if (4.0 <= devices.getSensorSignal("armPotHieght") && devices.getSensorSignal("armPotHieght") <= 4.2)	
+            		SmartDashboard::PutBoolean("Ready to Fire", true);
+            	else
+            		SmartDashboard::PutBoolean("Ready to Fire", false);
+            	
+            	// Correct Distance Indicator
+            	if (4.7 >= devices.getSensorSignal("ultrasonic") && devices.getSensorSignal("ultrasonic") <= 4.3)
+            		SmartDashboard::PutBoolean("Correct Distance", true);
+            	else
+            		SmartDashboard::PutBoolean("Correct Distance", false);
+            	
+            	// Check if distance is too far
+            	if (4.7 < devices.getSensorSignal("ultrasonic"))
+            		SmartDashboard::PutBoolean("Move Closer", true);
+            	else
+            		SmartDashboard::PutBoolean("Move Closer", false);
+            	
+            	// Check if distance is too close
+            	if (4.3 > devices.getSensorSignal("ultrasonic"))
+            		SmartDashboard::PutBoolean("Move Back", true);
+            	else
+            		SmartDashboard::PutBoolean("Move Back", false);
+            	
             	                
             	//----------DRIVER CODE-------------------------------------------
             	//----------------------------------------------------------------
             	//----------------------------------------------------------------
+            	
+            	// Update InputManager
+            	inpMan.update();
                 
         		//----------HIGH LOW SPEED SWITCHING------------------------------
                 // read and activate solenoids for the speed shifter.
@@ -316,7 +341,7 @@ public:
                 	}
                 	else
                 	{
-                		autoMan.correctAngle(2.29f, 0.1f, deltaT, !firstCallIndicator);
+                		autoMan.correctAngle(2.25f, 0.1f, deltaT, !firstCallIndicator);
                 	}
                 	if (!firstCallIndicator)
                 	   	firstCallIndicator = true;
