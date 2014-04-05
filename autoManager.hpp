@@ -18,6 +18,7 @@ namespace FRC
 		float positionSpeed;
 		float goodAngle, angleTopThreshold, angleBottomThreshold; 
 		float goodPosition, positionTopThreshold, positionBottomThreshold;
+		float baseAngleTopThreshold, baseAngleBottomThreshold;
 		float gyroCorrection, prevGyro, currGyro;
 		float prevAngle;
 		float proportionalErrorPos, integralErrorPos, proportionalErrorAngle, integralErrorAngle;
@@ -28,7 +29,8 @@ namespace FRC
 	public:
 		autoManager( FRC::deviceManager * devMan, FRC::armManager * armMan );
 		void correctPosition( float desiredPos, float posThresh, double deltaT);
-		void correctAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall);
+		void correctArmAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall);
+		void correctDriveAngle( float desiredAngle, float angleThresh, double deltaT );
 		bool isAtCorrectPosition();
 		bool isAtCorrectAngle();
 	};

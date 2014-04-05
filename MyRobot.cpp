@@ -120,7 +120,9 @@ public:
             	SmartDashboard::PutNumber("i2c Counter", Count);
             	SmartDashboard::PutNumber("Arm Angle", devices.getSensorSignal("armPotHieght"));
             	SmartDashboard::PutNumber("Gyro", devices.getSensorSignal("gyro"));
-            	SmartDashboard::PutNumber("Ultrasonic Distance", devices.getSensorSignal("ultrasonic"));
+            	SmartDashboard::PutNumber("Ultrasonic Right", devices.getSensorSignal("ultrasonic right"));
+            	SmartDashboard::PutNumber("Ultrasonic Left", devices.getSensorSignal("ultrasonic left"));
+            	SmartDashboard::PutNumber("Angle to Wall", devices.angleToWall());
             	
             	inPosition = false;
             	goodAngle = false;
@@ -136,10 +138,10 @@ public:
         		// If we are not in the correct position and angle run the following
         		if (fired == false)
         		{
-        			autoMan.correctPosition(4.5f, 0.5f, deltaT); // Distance value in inches @ 3/21 was 34, 6
+        			autoMan.correctPosition(4.5f, 0.8f, deltaT); // Distance value in inches @ 3/21 was 34, 6
         			
         			// Angle value in voltage @ 3/21 was 4.2, 0.25
-        			autoMan.correctAngle(4.1f, 0.1f, deltaT, !firstCallIndicator);
+        			autoMan.correctArmAngle(4.1f, 0.1f, deltaT, !firstCallIndicator);
                     if (!firstCallIndicator)
                     	firstCallIndicator = true;
                     
@@ -162,7 +164,7 @@ public:
 
                 // GUI Manager print statements
                 guiMan.print(3, "Arm Pot = %f", devices.getSensorSignal("armPotHieght"));
-                guiMan.print(4, "Distance(ft) = %f", devices.getSensorSignal("ultrasonic"));
+                guiMan.print(4, "Distance(ft) = %f", devices.getSensorSignal("ultrasonic right"));
                 guiMan.print(5, "Firing delay(s) = %f", 0.5*inpMan.getJoystickAxis(2, 4) + 0.5);
         		
         		guiMan.update();
@@ -240,7 +242,7 @@ public:
             	
             	// I2C Wait to Send function
             	Count++;
-            	if (Count >=10)
+            	if (Count == 10)
             	{
             		if (devices.getSensorSignal("armPotHieght") >= 4.0 && devices.getSensorSignal("armPotHieght") <= 4.2)
             		{
@@ -252,12 +254,17 @@ public:
             			//printf("stat = %d\n", wire_i2c->Write(0,0x72)); // sets LED red
             			wire_i2c->Write(0,0x72);
             		}
+            	}
+            	if (Count == 20)
+            	{
             		wire_i2c->Write(0,0x74); 
             		//wire_i2c->Transaction(datatosend,0,datareceived,2);
             		printf("i2c Temp Connection %i\n", wire_i2c->Transaction(datatosend,0,datareceived,2));
             		SmartDashboard::PutNumber("Temp1 F", datareceived[0]);
             		SmartDashboard::PutNumber("Temp2 F", datareceived[1]);
-            		
+            	}
+            	if (Count == 30)
+            	{          
             		wire_i2c->Write(0,0x73);
             		//wire_i2c->Transaction(datatosend,0,datareceived,1);
             		printf("i2c Speed Connection %i\n", wire_i2c->Transaction(datatosend,0,datareceived,1));
@@ -270,8 +277,10 @@ public:
             	SmartDashboard::PutNumber("JAG2 Current", devices.getCANJagCurrent(3));
             	SmartDashboard::PutNumber("i2c Counter", Count);
             	SmartDashboard::PutNumber("Arm Angle", devices.getSensorSignal("armPotHieght"));
-            	SmartDashboard::PutNumber("Ultrasonic Distance", devices.getSensorSignal("ultrasonic"));
+            	SmartDashboard::PutNumber("Ultrasonic Right", devices.getSensorSignal("ultrasonic right"));
             	SmartDashboard::PutNumber("Gyro", devices.getSensorSignal("gyro"));
+            	SmartDashboard::PutNumber("Ultrasonic Left", devices.getSensorSignal("ultrasonic left"));
+            	SmartDashboard::PutNumber("Angle to Wall", devices.angleToWall());
             	
             	// Correct Arm Position Indicator
             	if (4.0 <= devices.getSensorSignal("armPotHieght") && devices.getSensorSignal("armPotHieght") <= 4.2)	
@@ -280,19 +289,19 @@ public:
             		SmartDashboard::PutBoolean("Ready to Fire", false);
             	
             	// Correct Distance Indicator
-            	if (4.7 >= devices.getSensorSignal("ultrasonic") && devices.getSensorSignal("ultrasonic") <= 4.3)
+            	if (4.7 >= devices.getSensorSignal("ultrasonic right") && devices.getSensorSignal("ultrasonic right") <= 4.3)
             		SmartDashboard::PutBoolean("Correct Distance", true);
             	else
             		SmartDashboard::PutBoolean("Correct Distance", false);
             	
             	// Check if distance is too far
-            	if (4.7 < devices.getSensorSignal("ultrasonic"))
+            	if (4.7 < devices.getSensorSignal("ultrasonic right"))
             		SmartDashboard::PutBoolean("Move Closer", true);
             	else
             		SmartDashboard::PutBoolean("Move Closer", false);
             	
             	// Check if distance is too close
-            	if (4.3 > devices.getSensorSignal("ultrasonic"))
+            	if (4.3 > devices.getSensorSignal("ultrasonic right"))
             		SmartDashboard::PutBoolean("Move Back", true);
             	else
             		SmartDashboard::PutBoolean("Move Back", false);
@@ -322,7 +331,7 @@ public:
         		}
         		
         		//----------SET DRIVE MOTOR COMMANDS------------------------------        
-                devices.setSpeed(1, inpMan.getDriveCommand("right") * 0.9f);
+        		devices.setSpeed(1, inpMan.getDriveCommand("right") * 0.9f);
                 devices.setSpeed(2, -inpMan.getDriveCommand("left") * 0.9f);
                 
                 //----------SHOOTER CODE------------------------------------------
@@ -337,11 +346,11 @@ public:
                 {
                 	if (inpMan.getJoystickButton(2, 2) == true)
                 	{
-                		autoMan.correctAngle(4.1f, 0.1f, deltaT, !firstCallIndicator);
+                		autoMan.correctArmAngle(4.1f, 0.1f, deltaT, !firstCallIndicator);
                 	}
                 	else
                 	{
-                		autoMan.correctAngle(2.25f, 0.1f, deltaT, !firstCallIndicator);
+                		autoMan.correctArmAngle(2.25f, 0.1f, deltaT, !firstCallIndicator);
                 	}
                 	if (!firstCallIndicator)
                 	   	firstCallIndicator = true;
@@ -392,6 +401,11 @@ public:
                 	devices.vacMotor1Control(1.0);
                 	devices.vacMotor2Control(1.0);
                 }
+                
+                if (inpMan.getJoystickButton(1, 2))
+                {
+                	autoMan.correctDriveAngle(0.0, 5.0, 0);
+                }
                                                                
              
                 //------------------LCD PRINTS--------------------------------
@@ -423,7 +437,7 @@ public:
                 
                 // GUI Manager print statements
                 guiMan.print(3, "Arm Pot = %f", devices.getSensorSignal("armPotHieght"));
-                guiMan.print(4, "Distance(ft) = %f", devices.getSensorSignal("ultrasonic"));
+                guiMan.print(4, "Distance(ft) = %f", devices.getSensorSignal("ultrasonic right"));
                 
                 //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display

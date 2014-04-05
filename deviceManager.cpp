@@ -1,13 +1,16 @@
 #include "deviceManager.hpp"
 #include <iostream>
+#define PI 3.1415926
+
 FRC::deviceManager::deviceManager() :
 	drivemotor1(3),
 	drivemotor2(2),
 	//vacMotor1(3),
 	//vacMotor2(4),
 	gyro(2),
-	ultrasonic(3),
-	armPotHeight(4),
+	ultrasonicRight(3),
+	ultrasonicLeft(4),
+	armPotHeight(5),
 	armhomeswitch(3),
 	compressor(1,1),
 	armfire(1),
@@ -143,10 +146,18 @@ float FRC::deviceManager::getSensorSignal(string device)
 		return gyro.GetAngle();
 		//return gyro.GetVoltage();
 	}
-	else if (device == "ultrasonic")
+	else if (device == "ultrasonic right")
 	{
 		//return ultrasonic.GetVoltage();
-		return ultrasonic.GetAverageVoltage()*512/60;
+		return ultrasonicRight.GetAverageVoltage()*512/60;
+	}
+	else if (device == "ultrasonic left")
+	{
+		return ultrasonicLeft.GetAverageVoltage()*512/60;
+	}
+	else if (device == "dual ultrasonic")
+	{
+		return ((ultrasonicRight.GetAverageVoltage() + ultrasonicLeft.GetAverageVoltage())*0.5*512/60);
 	}
 	else if (device == "armPotHieght")
 	{
@@ -190,4 +201,18 @@ int FRC::deviceManager::getHomeSwitch(void)
 void FRC::deviceManager::resetGyro(void)
 {
 	gyro.Reset();
+}
+
+float FRC::deviceManager::angleToWall()
+{
+	// distance between ultrasonic sensors in inches, 21 rough estimate
+	float x = 21.0 / 12.0; // feet
+	
+	// difference between right and left sensors
+	float y = (ultrasonicRight.GetAverageVoltage() - ultrasonicLeft.GetAverageVoltage()) * 512/60;
+	
+	// trig woo
+	float theta = atan(y / x);
+	
+	return -theta * 180 / PI;
 }

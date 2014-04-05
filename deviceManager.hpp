@@ -1,6 +1,8 @@
 #ifndef FRC2014_DEVICEMANAGER
 #define FRC2014_DEVICEMANAGER
 #include "WPILib.h"
+#include <cmath>
+
 namespace FRC
 {
         ///@brief a class that will lock the controls, and counter out deadband
@@ -14,7 +16,7 @@ namespace FRC
         	Victor drivemotor1, drivemotor2;
         	//Talon vacMotor1, vacMotor2;
         	Gyro gyro;
-        	AnalogChannel ultrasonic, armPotHeight;
+        	AnalogChannel ultrasonicRight, ultrasonicLeft, armPotHeight;
         	DigitalInput armhomeswitch;
         	Compressor compressor;
         	Solenoid armfire, armrelief, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
@@ -48,6 +50,8 @@ namespace FRC
         	void armMotorControl(float speed);
         	int getHomeSwitch(void);
         	void resetGyro(void);
+        	float averageDistance();
+        	float angleToWall();
         };
 }
 #endif // FRC2014_GUIMANAGER

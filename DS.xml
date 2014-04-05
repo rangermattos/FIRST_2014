@@ -1,5 +1,25 @@
 <xml version="1.0">
 <dashboard>
+	<widget field="Vac Speed" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
+		<location x="530" y="230"/>
+	</widget>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.Label">
+		<location x="156" y="106"/>
+		<property name="Text" value="Ultrasonic Wall"/>
+	</static-widget>
+	<widget field="Angle to Wall" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.SimpleDial">
+		<location x="69" y="129"/>
+		<width>228</width>
+		<property name="Upper Limit" value="180.0"/>
+		<property name="Lower Limit" value="-180.0"/>
+		<property name="Tick Interval" value="20.0"/>
+	</widget>
+	<widget field="Ultrasonic Left" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="9" y="289"/>
+	</widget>
+	<widget field="Ultrasonic Right" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="191" y="290"/>
+	</widget>
 	<widget field="Move Back" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
 		<location x="1016" y="158"/>
 		<width>175</width>
@@ -20,18 +40,15 @@
 		<height>32</height>
 	</widget>
 	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.Label">
-		<location x="529" y="117"/>
+		<location x="529" y="118"/>
 		<property name="Text" value="Smart Dashboard Connection"/>
 	</static-widget>
-	<widget field="Vac Speed" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
-		<location x="530" y="230"/>
-	</widget>
 	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.Label">
 		<location x="1044" y="231"/>
 		<property name="Text" value="Gyro [Degrees]"/>
 	</static-widget>
 	<widget field="Gyro" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.SimpleDial">
-		<location x="954" y="248"/>
+		<location x="958" y="247"/>
 		<width>258</width>
 		<height>169</height>
 		<property name="Upper Limit" value="180.0"/>
@@ -54,9 +71,6 @@
 		<location x="548" y="168"/>
 		<width>121</width>
 	</widget>
-	<widget field="Ultrasonic Distance" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="17" y="344"/>
-	</widget>
 	<widget field="Update rate (s)" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="520" y="146"/>
 		<width>149</width>
@@ -67,7 +81,8 @@
 	</static-widget>
 	<widget field="Temp1 F" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.SimpleDial">
 		<location x="593" y="321"/>
-		<width>229</width>
+		<width>220</width>
+		<height>150</height>
 	</widget>
 	<widget field="i2c Counter" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="539" y="190"/>
@@ -75,12 +90,12 @@
 		<height>23</height>
 	</widget>
 	<widget field="Ready to Fire" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
-		<location x="10" y="417"/>
-		<width>261</width>
-		<height>187</height>
+		<location x="75" y="414"/>
+		<width>282</width>
+		<height>208</height>
 	</widget>
 	<widget field="Arm Angle" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
-		<location x="59" y="366"/>
+		<location x="120" y="343"/>
 	</widget>
 	<widget field="Shifter High" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
 		<location x="994" y="431"/>

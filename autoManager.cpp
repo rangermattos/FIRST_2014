@@ -16,7 +16,7 @@ void FRC::autoManager::correctPosition( float desiredPos, float posThresh, doubl
 	goodPosition = desiredPos;
 	positionTopThreshold = desiredPos + posThresh;
 	positionBottomThreshold = desiredPos - posThresh;
-	position = devices->getSensorSignal("ultrasonic"); // Distance sensor converted to inches
+	position = devices->getSensorSignal("ultrasonic right"); // Distance sensor converted to inches
 
 	if(position > positionTopThreshold || position < positionBottomThreshold) // over or under threshold
 	{
@@ -67,7 +67,7 @@ void FRC::autoManager::correctPosition( float desiredPos, float posThresh, doubl
 
 }
 
-void FRC::autoManager::correctAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall)
+void FRC::autoManager::correctArmAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall)
 {
 	if (firstCall)
 		prevAngle = devices->getSensorSignal("armPotHieght");
@@ -109,6 +109,31 @@ void FRC::autoManager::correctAngle( float desiredAngle, float angleThresh, doub
 		isGoodAngle = true;
 	}
 	
+}
+
+void FRC::autoManager::correctDriveAngle( float desiredAngle, float angleThresh, double deltaT )
+{
+	baseAngleTopThreshold = desiredAngle + angleThresh;
+	baseAngleBottomThreshold = desiredAngle - angleThresh;
+	
+	float angleToWall = devices->angleToWall();
+	float turnSpeed = 0.2;
+	
+	if (angleToWall > baseAngleTopThreshold)
+	{
+		devices->setSpeed(1, turnSpeed);
+		devices->setSpeed(2, turnSpeed);
+	}
+	else if (angleToWall < baseAngleBottomThreshold)
+	{
+		devices->setSpeed(1, -turnSpeed);
+		devices->setSpeed(2, -turnSpeed);
+	}
+	else
+	{
+		devices->setSpeed(1, 0);
+		devices->setSpeed(2, 0);
+	}
 }
 
 bool FRC::autoManager::isAtCorrectPosition()

@@ -22,7 +22,7 @@ void FRC::vacManager::shoot(float delay)
 	devices->vacMotor2Control(0);
 			
 	// Allow time for the ball to fire before dropping the solenoids back down
-	Wait(1.0);
+	Wait(1.0); //1
 			
 	devices->setSolenoid(1, false);
 	devices->setSolenoid(2, true);
