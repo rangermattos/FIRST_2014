@@ -12,6 +12,7 @@ FRC::deviceManager::deviceManager() :
 	ultrasonicLeft(4),
 	armPotHeight(5),
 	armhomeswitch(3),
+	ultrasonicDiode(0),
 	compressor(1,1),
 	armfire(1),
 	armrelief(2),
@@ -215,4 +216,9 @@ float FRC::deviceManager::angleToWall()
 	float theta = atan(y / x);
 	
 	return -theta * 180 / PI;
+}
+
+void FRC::deviceManager::setUltrasonicDiode( bool value )
+{
+	ultrasonicDiode.Set(value);
 }

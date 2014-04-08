@@ -18,6 +18,7 @@ namespace FRC
         	Gyro gyro;
         	AnalogChannel ultrasonicRight, ultrasonicLeft, armPotHeight;
         	DigitalInput armhomeswitch;
+        	DigitalOutput ultrasonicDiode;
         	Compressor compressor;
         	Solenoid armfire, armrelief, lowsp, highsp; // sol1 = pulls out shooter piston, sol 2 = pulls in shooter piston
         	bool pistonExtended;
@@ -52,6 +53,7 @@ namespace FRC
         	void resetGyro(void);
         	float averageDistance();
         	float angleToWall();
+        	void setUltrasonicDiode( bool value );
         };
 }
 #endif // FRC2014_GUIMANAGER

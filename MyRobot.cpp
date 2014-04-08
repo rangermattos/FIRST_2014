@@ -203,6 +203,11 @@ public:
 			// REMOTE TEST CODE WPT 03/29/14 reset gyro before match
 			devices.resetGyro();
 			
+			// sync ultrasonics
+			devices.setUltrasonicDiode(1);
+			Wait(0.005);
+			devices.setUltrasonicDiode(0);
+			
 			// Timer setup
         	//Timer(t1);
         	t1.Reset();
