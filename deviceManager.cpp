@@ -12,7 +12,7 @@ FRC::deviceManager::deviceManager() :
 	ultrasonicLeft(4),
 	armPotHeight(5),
 	armhomeswitch(3),
-	ultrasonicDiode(0),
+	ultrasonicDiode(2),
 	compressor(1,1),
 	armfire(1),
 	armrelief(2),

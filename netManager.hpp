@@ -19,23 +19,27 @@ private:
 	int sfd;
 	struct sockaddr_in managerAddress;
 	//VXWORKS task function (no threading, just tasks)
-	void taskFunc(int netManagerPtr);
+	static void taskFunc(int netManagerPtr);
 	int semaphore;
 	int taskHandle;
 	FRC::guiManager * gMan;
+	volatile bool goalHot;
 public:
-	netManager(FRC::guiManager * guiMan);
+	netManager();
 	///@brief connects to the remote server
 	///
 	///if the connection drops, will just drop connection, and return 0s, but
 	///will not cause the robot to stop working....
 	///sends an ENABLE FRCV message
 	int connect(const char * ipAddress, short port);
+	//listen on quad 0 for incomming connections from the driver station
+	void spawnServer();
 	//must be called in the main loop to grab new packets
 	void update();
 	//sends a message to the remote server
 	int sendMsg(message & msg, bool sendToDS);
-	void close();
+	//void close();
+	bool getGoalIsHot();
 	message * getMsg();
 };
 

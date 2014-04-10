@@ -6,6 +6,7 @@
 #include "vacManager.hpp"
 #include "armManager.hpp"
 #include "autoManager.hpp"
+//#include "netManager.hpp"
 #include "NetworkTables/NetworkTable.h"
 #include "commonFunctions.hpp"
 #include <iostream>
@@ -38,7 +39,7 @@ class RobotDemo : public SimpleRobot
 	int CmpP, SpdP, Count; // robot state variable indicators
 	Timer(t1); // timer for loop
 	double prevTime, currTime, deltaT; // stores previous, current, change in time for loop
-	bool firstCallIndicator; // used to clear the error integration function for the automative moves
+	bool firstCallIndicatorAngle, firstCallIndicatorDrive; // used to clear the error integration function for the automative moves
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
 	//netManager netMan;
@@ -56,15 +57,17 @@ public:
 		t1(),
 		drive(DriverStation::GetInstance()),
 		//display(DriverStationLCD::GetInstance())
-		//netMan(&guiMan)
+		//netMan(),
 		vacMan(&devices),
 		armMan(&devices),
 		autoMan(&devices, &armMan),
-		firstCallIndicator(0)
+		firstCallIndicatorAngle(0),
+		firstCallIndicatorDrive(0)
 		{
 			//myRobot.SetExpiration(0.1);
 			devices.startCompressor();
 			wire_i2c = DigitalModule::GetInstance(1)->GetI2C(4);
+			//netMan.spawnServer();
 			//netMan.connect("10.51.48.50", 1180);
 		}
 
@@ -141,9 +144,9 @@ public:
         			autoMan.correctPosition(4.5f, 0.8f, deltaT); // Distance value in inches @ 3/21 was 34, 6
         			
         			// Angle value in voltage @ 3/21 was 4.2, 0.25
-        			autoMan.correctArmAngle(4.1f, 0.1f, deltaT, !firstCallIndicator);
-                    if (!firstCallIndicator)
-                    	firstCallIndicator = true;
+        			autoMan.correctArmAngle(4.1f, 0.1f, deltaT, !firstCallIndicatorAngle);
+                    if (!firstCallIndicatorAngle)
+                    	firstCallIndicatorAngle = true;
                     
         		}
         		inPosition = autoMan.isAtCorrectPosition();
@@ -205,7 +208,7 @@ public:
 			
 			// sync ultrasonics
 			devices.setUltrasonicDiode(1);
-			Wait(0.005);
+			Wait(0.00005);
 			devices.setUltrasonicDiode(0);
 			
 			// Timer setup
@@ -218,7 +221,7 @@ public:
         	vacStatus = false;
         	vacSpeed = false;
         	
-        	firstCallIndicator = false;
+        	firstCallIndicatorAngle = false;
         	
             while (IsOperatorControl())
             {
@@ -351,18 +354,18 @@ public:
                 {
                 	if (inpMan.getJoystickButton(2, 2) == true)
                 	{
-                		autoMan.correctArmAngle(4.1f, 0.1f, deltaT, !firstCallIndicator);
+                		autoMan.correctArmAngle(4.1f, 0.1f, deltaT, !firstCallIndicatorAngle);
                 	}
                 	else
                 	{
-                		autoMan.correctArmAngle(2.25f, 0.1f, deltaT, !firstCallIndicator);
+                		autoMan.correctArmAngle(2.25f, 0.1f, deltaT, !firstCallIndicatorAngle);
                 	}
-                	if (!firstCallIndicator)
-                	   	firstCallIndicator = true;
+                	if (!firstCallIndicatorAngle)
+                	   	firstCallIndicatorAngle = true;
                 }
                 else
                 {
-                	firstCallIndicator = false;
+                	firstCallIndicatorAngle = false;
                 }
                 
                 //----------MANAGE VACUUM SHOOTING--------------------------------
@@ -409,9 +412,22 @@ public:
                 
                 if (inpMan.getJoystickButton(1, 2))
                 {
-                	autoMan.correctDriveAngle(0.0, 5.0, 0);
+                	autoMan.correctDriveAngle(0.0, 1.0, deltaT, !firstCallIndicatorDrive);
+            	
+                	if (!firstCallIndicatorDrive)
+                		firstCallIndicatorDrive = true;
                 }
-                                                               
+                else
+                {
+                	firstCallIndicatorDrive = false;
+                }
+                             
+                if (inpMan.getJoystickButton(3, 2))
+                {
+                	autoMan.correctPosition(4.5f, 0.8f, deltaT);
+                	
+                	
+                }
              
                 //------------------LCD PRINTS--------------------------------
                 //------------------------------------------------------------

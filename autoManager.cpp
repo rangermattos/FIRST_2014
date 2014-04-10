@@ -9,6 +9,8 @@ FRC::autoManager::autoManager( FRC::deviceManager * devMan, FRC::armManager * ar
 	iGainPos = 0.1 * pGainPos;
 	pGainAngle = 1.5; 
 	iGainAngle = 0.1; // change value at some point
+	pGainDriveAngle = 0.04;
+	iGainDriveAngle = 0.01;
 }
 
 void FRC::autoManager::correctPosition( float desiredPos, float posThresh, double deltaT)
@@ -67,7 +69,7 @@ void FRC::autoManager::correctPosition( float desiredPos, float posThresh, doubl
 
 }
 
-void FRC::autoManager::correctArmAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall)
+void FRC::autoManager::correctArmAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall )
 {
 	if (firstCall)
 		prevAngle = devices->getSensorSignal("armPotHieght");
@@ -111,28 +113,56 @@ void FRC::autoManager::correctArmAngle( float desiredAngle, float angleThresh, d
 	
 }
 
-void FRC::autoManager::correctDriveAngle( float desiredAngle, float angleThresh, double deltaT )
+void FRC::autoManager::correctDriveAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall )
 {
+	if (firstCall)
+		prevDriveAngle = devices->angleToWall();
+	else 
+		prevDriveAngle = angleToWall;
+	
 	baseAngleTopThreshold = desiredAngle + angleThresh;
 	baseAngleBottomThreshold = desiredAngle - angleThresh;
 	
-	float angleToWall = devices->angleToWall();
-	float turnSpeed = 0.2;
+	angleToWall = devices->angleToWall();
+	/*float turnSpeed = 0.6;
 	
 	if (angleToWall > baseAngleTopThreshold)
 	{
-		devices->setSpeed(1, turnSpeed);
-		devices->setSpeed(2, turnSpeed);
+		devices->setSpeed(1, -turnSpeed);
+		devices->setSpeed(2, -turnSpeed);
 	}
 	else if (angleToWall < baseAngleBottomThreshold)
 	{
-		devices->setSpeed(1, -turnSpeed);
-		devices->setSpeed(2, -turnSpeed);
+		devices->setSpeed(1, turnSpeed);
+		devices->setSpeed(2, turnSpeed);
 	}
 	else
 	{
 		devices->setSpeed(1, 0);
 		devices->setSpeed(2, 0);
+	}*/
+	
+	if (angleToWall > baseAngleTopThreshold || angleToWall < baseAngleBottomThreshold)
+	{
+		proportionalErrorDriveAngle = desiredAngle - angleToWall;
+		
+		// use trapezoid to calculate integral
+		integralErrorDriveAngle = 0.5 * deltaT * (angleToWall + prevDriveAngle);
+		
+		correctionCommandDriveAngle = (pGainDriveAngle * proportionalErrorDriveAngle + iGainDriveAngle * integralErrorDriveAngle);
+		correctionCommandDriveAngle = clamp(-1, 1, correctionCommandDriveAngle);
+		
+		// print for debugging
+		//printf("correctionCommandDriveAngle: %f\n", correctionCommandDriveAngle);
+		
+		devices->setSpeed(1, correctionCommandDriveAngle);
+		devices->setSpeed(2, correctionCommandDriveAngle);
+	}
+	else
+	{
+		// robot is within threshold, stop motors
+		devices->setSpeed(1, 0.0);
+		devices->setSpeed(2, 0.0);
 	}
 }
 

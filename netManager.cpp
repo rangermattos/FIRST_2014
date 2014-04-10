@@ -1,13 +1,71 @@
 #include "netManager.hpp"
 #include "semLib.h"
+#define SERVER_PORT_NUM 1180
+#define SERVER_MAX_CONNECTIONS 1
 void netManager::taskFunc(int netManager)
 {
 	//netManager * netMan = (netManager *) &netManager;
 	printf("%s","task made sucessfully\n");
+	struct sockaddr_in serverAddr;
+	struct sockaddr_in clientAddr;
+	int sockAddrSize;
+	int sfd;
+	int clifd;
+	int ix = 0;
+	char workname[16];
+	sockAddrSize = sizeof(struct sockaddr);
+	bzero((char *) &serverAddr, sockAddrSize);
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_len = (u_char) sockAddrSize;
+	serverAddr.sin_port = htons(SERVER_PORT_NUM);
+	serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	//create tcp socket
+	if((sfd = socket(AF_INET, SOCK_STREAM, 0)) == ERROR)
+	{
+		perror("socket error ");
+		return;
+	}
+	if(bind(sfd, (struct sockaddr*)&serverAddr, sockAddrSize) == ERROR)
+	{
+		perror("bind fail ");
+		return;
+	}
+	
+	//listen for driver station
+	if(listen(sfd, 1) == ERROR)
+	{
+		perror("Hey! Listen! ");
+		close(sfd);
+		return;
+	}
+	while(true)
+	{
+		if((clifd = accept(sfd, (struct sockaddr *) &clientAddr, &sockAddrSize)) == ERROR)
+		{
+			perror("cannot accpet matchmaking!");
+			close(sfd);
+			return;
+		}
+		printf("Client has connected successfully");
+		char packet[1500];
+		int recAmnt = 0;
+		while(recAmnt != -1)
+		{
+			recAmnt = recv(clifd, packet, 1500, 0);
+			//netMan->goalHot = packet[0];
+			printf("received data\n");
+		}
+		
+	}
 }
-netManager::netManager(FRC::guiManager * guiMan)
+netManager::netManager()
 {
 	//gMan = guiMan;
+	goalHot = false;
+}
+bool netManager::getGoalIsHot()
+{
+	return goalHot;
 }
 int netManager::connect(const char * ipAddress, short port)
 {
@@ -56,6 +114,10 @@ int netManager::connect(const char * ipAddress, short port)
 	//gMan->update();
 	//init socket listening task
 	//taskHandle = taskSpawn("Network Task", 100, 0, 10000, taskFunc, (int)this);
+}
+void netManager::spawnServer()
+{
+	taskHandle = taskSpawn("network Task", 100, 0, 10000, (FUNCPTR)taskFunc, (int)this, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 }
 int netManager::sendMsg(message & msg, bool sendToDS)
 {

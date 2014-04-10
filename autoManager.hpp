@@ -16,21 +16,24 @@ namespace FRC
 		float angleSpeed;
 		float position;					// distance to wall, in inches
 		float positionSpeed;
+		float angleToWall;
 		float goodAngle, angleTopThreshold, angleBottomThreshold; 
 		float goodPosition, positionTopThreshold, positionBottomThreshold;
 		float baseAngleTopThreshold, baseAngleBottomThreshold;
 		float gyroCorrection, prevGyro, currGyro;
 		float prevAngle;
-		float proportionalErrorPos, integralErrorPos, proportionalErrorAngle, integralErrorAngle;
-		float pGainPos, iGainPos, pGainAngle, iGainAngle;
-		float correctionCommandPos, correctionCommandAngle;
+		float prevDriveAngle;
+		float proportionalErrorPos, integralErrorPos, proportionalErrorAngle, integralErrorAngle,
+			proportionalErrorDriveAngle, integralErrorDriveAngle;
+		float pGainPos, iGainPos, pGainAngle, iGainAngle, pGainDriveAngle, iGainDriveAngle;
+		float correctionCommandPos, correctionCommandAngle, correctionCommandDriveAngle;
 		bool isGoodPosition, isGoodAngle;
 		
 	public:
 		autoManager( FRC::deviceManager * devMan, FRC::armManager * armMan );
 		void correctPosition( float desiredPos, float posThresh, double deltaT);
 		void correctArmAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall);
-		void correctDriveAngle( float desiredAngle, float angleThresh, double deltaT );
+		void correctDriveAngle( float desiredAngle, float angleThresh, double deltaT, bool firstCall );
 		bool isAtCorrectPosition();
 		bool isAtCorrectAngle();
 	};
