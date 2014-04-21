@@ -2,17 +2,17 @@
 #include "semLib.h"
 #define SERVER_PORT_NUM 1180
 #define SERVER_MAX_CONNECTIONS 1
-void netManager::taskFunc(int netManager)
+void netManager::taskFunc(int netManPtr)
 {
-	//netManager * netMan = (netManager *) &netManager;
+	netManager * netMan = (netManager *) &netManPtr;
 	printf("%s","task made sucessfully\n");
 	struct sockaddr_in serverAddr;
 	struct sockaddr_in clientAddr;
 	int sockAddrSize;
 	int sfd;
 	int clifd;
-	int ix = 0;
-	char workname[16];
+	//int ix = 0;
+	//char workname[16];
 	sockAddrSize = sizeof(struct sockaddr);
 	bzero((char *) &serverAddr, sockAddrSize);
 	serverAddr.sin_family = AF_INET;
@@ -38,6 +38,7 @@ void netManager::taskFunc(int netManager)
 		close(sfd);
 		return;
 	}
+	printf("for once, I listen\n");
 	while(true)
 	{
 		if((clifd = accept(sfd, (struct sockaddr *) &clientAddr, &sockAddrSize)) == ERROR)
@@ -52,8 +53,14 @@ void netManager::taskFunc(int netManager)
 		while(recAmnt != -1)
 		{
 			recAmnt = recv(clifd, packet, 1500, 0);
-			//netMan->goalHot = packet[0];
-			printf("received data\n");
+			netMan->goalStatus = packet[0];
+			//printf("received data %i\n", (int)packet[0]);
+			if(netMan->goalStatus == 1)
+				printf("goal is hot, we can shoot boss!\n");
+			else if(netMan->goalStatus == 0)
+				printf("goal is not hot, we wait\n");
+			else if(netMan->goalStatus == 2)
+				printf("Error : Camera stream is not working\n");
 		}
 		
 	}
@@ -61,11 +68,11 @@ void netManager::taskFunc(int netManager)
 netManager::netManager()
 {
 	//gMan = guiMan;
-	goalHot = false;
+	goalStatus = 0;
 }
 bool netManager::getGoalIsHot()
 {
-	return goalHot;
+	return goalStatus;
 }
 int netManager::connect(const char * ipAddress, short port)
 {
@@ -117,7 +124,9 @@ int netManager::connect(const char * ipAddress, short port)
 }
 void netManager::spawnServer()
 {
+	printf("spawning Server\n");
 	taskHandle = taskSpawn("network Task", 100, 0, 10000, (FUNCPTR)taskFunc, (int)this, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	printf("spawn successful\n");
 }
 int netManager::sendMsg(message & msg, bool sendToDS)
 {

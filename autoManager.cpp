@@ -7,8 +7,8 @@ FRC::autoManager::autoManager( FRC::deviceManager * devMan, FRC::armManager * ar
 	isGoodPosition = isGoodAngle = false;
 	pGainPos = 0.5; // was 1.0
 	iGainPos = 0.1 * pGainPos;
-	pGainAngle = 1.5; 
-	iGainAngle = 0.1; // change value at some point
+	pGainAngle = 1.8; 
+	iGainAngle = 0.4; // change value at some point
 	pGainDriveAngle = 0.04;
 	iGainDriveAngle = 0.01;
 }

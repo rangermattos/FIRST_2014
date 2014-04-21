@@ -1,7 +1,12 @@
 <xml version="1.0">
 <dashboard>
-	<widget field="Vac Speed" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.ProgressBar">
+	<widget field="Vac Speed" type="Number" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
 		<location x="530" y="230"/>
+	</widget>
+	<widget field="Camera Target Status" type="Boolean" class="edu.wpi.first.smartdashboard.gui.elements.BooleanBox">
+		<location x="167" y="45"/>
+		<width>147</width>
+		<height>36</height>
 	</widget>
 	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.Label">
 		<location x="156" y="106"/>

@@ -6,7 +6,7 @@
 #include "vacManager.hpp"
 #include "armManager.hpp"
 #include "autoManager.hpp"
-//#include "netManager.hpp"
+#include "netManager.hpp"
 #include "NetworkTables/NetworkTable.h"
 #include "commonFunctions.hpp"
 #include <iostream>
@@ -42,7 +42,7 @@ class RobotDemo : public SimpleRobot
 	bool firstCallIndicatorAngle, firstCallIndicatorDrive; // used to clear the error integration function for the automative moves
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
-	//netManager netMan;
+	netManager netMan;
 	
 public:
 	RobotDemo():
@@ -57,7 +57,7 @@ public:
 		t1(),
 		drive(DriverStation::GetInstance()),
 		//display(DriverStationLCD::GetInstance())
-		//netMan(),
+		netMan(),
 		vacMan(&devices),
 		armMan(&devices),
 		autoMan(&devices, &armMan),
@@ -67,7 +67,7 @@ public:
 			//myRobot.SetExpiration(0.1);
 			devices.startCompressor();
 			wire_i2c = DigitalModule::GetInstance(1)->GetI2C(4);
-			//netMan.spawnServer();
+			netMan.spawnServer();
 			//netMan.connect("10.51.48.50", 1180);
 		}
 
@@ -85,6 +85,7 @@ public:
 
         	devices.vacMotor1Control(1.0);
         	devices.vacMotor2Control(1.0);
+        	
         	
             //myRobot.SetSafetyEnabled(false);
         	
@@ -126,6 +127,7 @@ public:
             	SmartDashboard::PutNumber("Ultrasonic Right", devices.getSensorSignal("ultrasonic right"));
             	SmartDashboard::PutNumber("Ultrasonic Left", devices.getSensorSignal("ultrasonic left"));
             	SmartDashboard::PutNumber("Angle to Wall", devices.angleToWall());
+            	SmartDashboard::PutBoolean("Camera Target Status", netMan.getGoalIsHot() == 1);
             	
             	inPosition = false;
             	goodAngle = false;
@@ -141,10 +143,10 @@ public:
         		// If we are not in the correct position and angle run the following
         		if (fired == false)
         		{
-        			autoMan.correctPosition(4.5f, 0.8f, deltaT); // Distance value in inches @ 3/21 was 34, 6
+        			autoMan.correctPosition(6.35f, 0.8f, deltaT); // Distance value in inches @ 3/21 was 34, 6
         			
         			// Angle value in voltage @ 3/21 was 4.2, 0.25
-        			autoMan.correctArmAngle(4.1f, 0.1f, deltaT, !firstCallIndicatorAngle);
+        			autoMan.correctArmAngle(3.75f, 0.025f, deltaT, !firstCallIndicatorAngle);
                     if (!firstCallIndicatorAngle)
                     	firstCallIndicatorAngle = true;
                     
@@ -289,6 +291,7 @@ public:
             	SmartDashboard::PutNumber("Gyro", devices.getSensorSignal("gyro"));
             	SmartDashboard::PutNumber("Ultrasonic Left", devices.getSensorSignal("ultrasonic left"));
             	SmartDashboard::PutNumber("Angle to Wall", devices.angleToWall());
+            	SmartDashboard::PutBoolean("Camera Target Status", netMan.getGoalIsHot() == 1);
             	
             	// Correct Arm Position Indicator
             	if (4.0 <= devices.getSensorSignal("armPotHieght") && devices.getSensorSignal("armPotHieght") <= 4.2)	
@@ -321,7 +324,17 @@ public:
             	
             	// Update InputManager
             	inpMan.update();
+            	
+            	if (drive->GetDigitalIn(1) == 0)
+            	{
+            		devices.stopCompressor();
+            	}
                 
+            	else
+            	{
+            		devices.startCompressor();
+            	}
+            	
         		//----------HIGH LOW SPEED SWITCHING------------------------------
                 // read and activate solenoids for the speed shifter.
         		if (inpMan.getJoystickButton(3, 1)) // toggle solenoids with x button / 3 button
@@ -339,8 +352,8 @@ public:
         		}
         		
         		//----------SET DRIVE MOTOR COMMANDS------------------------------        
-        		devices.setSpeed(1, inpMan.getDriveCommand("right") * 0.9f);
-                devices.setSpeed(2, -inpMan.getDriveCommand("left") * 0.9f);
+        		devices.setSpeed(1, inpMan.getDriveCommand("right") * 1.0f);
+                devices.setSpeed(2, -inpMan.getDriveCommand("left") * 1.0f);
                 
                 //----------SHOOTER CODE------------------------------------------
                 //----------------------------------------------------------------
@@ -354,11 +367,11 @@ public:
                 {
                 	if (inpMan.getJoystickButton(2, 2) == true)
                 	{
-                		autoMan.correctArmAngle(4.1f, 0.1f, deltaT, !firstCallIndicatorAngle);
+                		autoMan.correctArmAngle(3.75f, 0.025f, deltaT, !firstCallIndicatorAngle);
                 	}
                 	else
                 	{
-                		autoMan.correctArmAngle(2.25f, 0.1f, deltaT, !firstCallIndicatorAngle);
+                		autoMan.correctArmAngle(2.3f, 0.025f, deltaT, !firstCallIndicatorAngle);
                 	}
                 	if (!firstCallIndicatorAngle)
                 	   	firstCallIndicatorAngle = true;

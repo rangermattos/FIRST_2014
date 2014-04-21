@@ -23,7 +23,7 @@ private:
 	int semaphore;
 	int taskHandle;
 	FRC::guiManager * gMan;
-	volatile bool goalHot;
+	volatile char goalStatus;
 public:
 	netManager();
 	///@brief connects to the remote server
