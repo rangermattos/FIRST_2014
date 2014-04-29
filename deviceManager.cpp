@@ -21,13 +21,14 @@ FRC::deviceManager::deviceManager() :
 	pistonExtended(0),
 	//encoder1(1, 2, true),
 	//encoder2(1, 2, true),
-	armMotor (new CANJaguar(2)),
-	vacMotor1  (new CANJaguar(3)),
-	vacMotor2  (new CANJaguar(4))
+	armMotor (new CANJaguar(2))
+	//vacMotor1  (new CANJaguar(3)),
+	//vacMotor2  (new CANJaguar(4))
 {
 
 	//vacMotor1 = new CANJaguar(2);
 	//vacMotor2 = new CANJaguar(3);
+	ultrasonicRight.SetAverageBits(16);
 }
 
 void FRC::deviceManager::setSpeed(int motor, float speed)
@@ -106,9 +107,9 @@ float FRC::deviceManager::getCANJagCurrent(int CANJag)
 	case 1:
 		return armMotor->GetOutputCurrent();
 	case 2:
-		return vacMotor1->GetOutputCurrent();
+		return 0; //vacMotor1->GetOutputCurrent();
 	case 3:
-		return vacMotor2->GetOutputCurrent();
+		return 0; //vacMotor2->GetOutputCurrent();
 	default:
 		return armMotor->GetOutputCurrent();
 	}
@@ -182,12 +183,12 @@ void FRC::deviceManager::drivemotor2Control(float speed)
 
 void FRC::deviceManager::vacMotor1Control(float speed)
 {
-	vacMotor1->Set(speed);
+	//vacMotor1->Set(speed);
 }
 
 void FRC::deviceManager::vacMotor2Control(float speed) 
 {
-	vacMotor2->Set(speed);
+	//vacMotor2->Set(speed);
 }
 
 void FRC::deviceManager::armMotorControl(float speed)

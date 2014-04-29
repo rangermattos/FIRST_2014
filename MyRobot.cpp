@@ -37,12 +37,15 @@ class RobotDemo : public SimpleRobot
 	bool IsArcade, prevArcade, vacStatus, vacSpeed;
 	bool inPosition, goodAngle, fired; // autonomous variables
 	int CmpP, SpdP, Count; // robot state variable indicators
-	Timer(t1); // timer for loop
+	Timer *t1; // timer for loop
 	double prevTime, currTime, deltaT; // stores previous, current, change in time for loop
 	bool firstCallIndicatorAngle, firstCallIndicatorDrive; // used to clear the error integration function for the automative moves
+	//bool firstAuton;
 	//DriverStationLCD *display;
 	//DriverStationEnhancedIO *displayenhanced;
-	netManager netMan;
+	//netManager netMan;
+	CANJaguar *vacMotor1;
+	CANJaguar *vacMotor2;
 	
 public:
 	RobotDemo():
@@ -50,25 +53,32 @@ public:
 				FRC::inputManager::MODE_JOY_TANK),	// joystick tank mode to start
 		devices(),
 		guiMan(),
-		IsArcade(0), 								// not arcade to start
-		prevArcade(0), 								// previously not arcade
-		inPosition(0),								// not yet in position
-		goodAngle(0),								// not yet at correct angle
-		t1(),
-		drive(DriverStation::GetInstance()),
-		//display(DriverStationLCD::GetInstance())
-		netMan(),
 		vacMan(&devices),
 		armMan(&devices),
 		autoMan(&devices, &armMan),
+		drive(DriverStation::GetInstance()),
+		
+		//IsArcade(0), 								// not arcade to start
+		//prevArcade(0), 								// previously not arcade
+		//inPosition(0),								// not yet in position
+		//goodAngle(0),								// not yet at correct angle
+		//t1(),
+		
+		//display(DriverStationLCD::GetInstance())
+		//netMan(),
+		
 		firstCallIndicatorAngle(0),
 		firstCallIndicatorDrive(0)
 		{
 			//myRobot.SetExpiration(0.1);
 			devices.startCompressor();
 			wire_i2c = DigitalModule::GetInstance(1)->GetI2C(4);
-			netMan.spawnServer();
+			//netMan.spawnServer();
 			//netMan.connect("10.51.48.50", 1180);
+				
+			t1 = new Timer();
+			vacMotor1 = new CANJaguar(3);
+			vacMotor2 = new CANJaguar(4);
 		}
 
         /**
@@ -83,11 +93,24 @@ public:
         	goodAngle = false;
         	fired = false;
 
-        	devices.vacMotor1Control(1.0);
-        	devices.vacMotor2Control(1.0);
+        	printf("Start of Autonomous\r\n");
+ 
+        	//devices.vacMotor1Control(1.0);
+        	//devices.vacMotor2Control(1.0);
+        	vacMotor1->Set(1.0);
+        	vacMotor2->Set(1.0);
         	
+        	Wait(0.005);
+        	vacMotor1->Set(1.0);
+        	vacMotor2->Set(1.0);
+        	
+			// sync ultrasonics
+			//devices.setUltrasonicDiode(1);
+			//Wait(0.00005);
+			//devices.setUltrasonicDiode(0);
         	
             //myRobot.SetSafetyEnabled(false);
+        	
         	
         	// Initial arm solenoid setting, not armed
 			devices.setSolenoid(1, false); // arm solenoid
@@ -101,19 +124,25 @@ public:
 			guiMan.print(0, "Spd LOW : Cmp ON");
 			guiMan.print(1, "Vacuum ON");
 			
+			// temp wait statement
+			printf("before wait\r\n");
+			Wait(2.0);
+			printf("after wait\r\n");
+			
 			// reset gyro before match
 			devices.resetGyro();
 			
 			// initialize timer
-			t1.Reset();
-			t1.Start();
+			t1->Reset();
+			t1->Start();
 			prevTime = -1.0;
 			
         	while (IsAutonomous())
         	{
+
         		// set initial prevTime unless currTime is set
-        		prevTime = (prevTime < 0) ? t1.Get() : currTime;
-    			currTime = t1.Get();
+        		prevTime = (prevTime < 0) ? t1->Get() : currTime;
+    			currTime = t1->Get();
     			deltaT = currTime - prevTime;
         		
         		// SMART DASHBOARD COMMANDS
@@ -127,26 +156,28 @@ public:
             	SmartDashboard::PutNumber("Ultrasonic Right", devices.getSensorSignal("ultrasonic right"));
             	SmartDashboard::PutNumber("Ultrasonic Left", devices.getSensorSignal("ultrasonic left"));
             	SmartDashboard::PutNumber("Angle to Wall", devices.angleToWall());
-            	SmartDashboard::PutBoolean("Camera Target Status", netMan.getGoalIsHot() == 1);
+            	//SmartDashboard::PutBoolean("Camera Target Status", netMan.getGoalIsHot() == 1);
             	
             	inPosition = false;
             	goodAngle = false;
         		
         		if (fired == false)
         		{
-
-        			devices.vacMotor1Control(1.0);
-        			devices.vacMotor2Control(1.0);
+                	vacMotor1->Set(1.0);
+                	vacMotor2->Set(1.0);
+        			
+        			//devices.vacMotor1Control(1.0);
+        			//devices.vacMotor2Control(1.0);
         			//printf("loop wait\n");
         		}
         		
         		// If we are not in the correct position and angle run the following
         		if (fired == false)
         		{
-        			autoMan.correctPosition(6.35f, 0.8f, deltaT); // Distance value in inches @ 3/21 was 34, 6
+        			autoMan.correctPosition(6.35f, 0.8f, deltaT); // Distance value in inches @ 6.35, 0.8
         			
         			// Angle value in voltage @ 3/21 was 4.2, 0.25
-        			autoMan.correctArmAngle(3.75f, 0.025f, deltaT, !firstCallIndicatorAngle);
+        			autoMan.correctArmAngle(3.70f, 0.15f, deltaT, !firstCallIndicatorAngle); // was 3.75, 0.05
                     if (!firstCallIndicatorAngle)
                     	firstCallIndicatorAngle = true;
                     
@@ -164,6 +195,14 @@ public:
         			// Fire
         			Wait(1.0); // Just to allow the robot arm to settle
         			vacMan.shoot(0.2);
+        			vacMotor1->Set(0.0);
+        			vacMotor2->Set(0.0);
+        			
+        			Wait(1.5); //1.0
+        						
+        			devices.setSolenoid(1, false);
+        			devices.setSolenoid(2, true);
+        				
         			fired = true;
         		}
 
@@ -174,7 +213,7 @@ public:
         		
         		guiMan.update();
         		Wait(0.008);
-        		SmartDashboard::PutNumber("Update rate (s)", t1.Get()-prevTime);
+        		SmartDashboard::PutNumber("Update rate (s)", t1->Get()-prevTime);
         		SmartDashboard::PutNumber("deltaT (s)", deltaT);
         		
         	}
@@ -187,8 +226,10 @@ public:
         {
         	guiMan.clear();
         	devices.startCompressor();
-        	devices.vacMotor1Control(0.0);
-        	devices.vacMotor2Control(0.0);
+        	vacMotor1->Set(0.0);
+        	vacMotor2->Set(0.0);
+        	//devices.vacMotor1Control(0.0);
+        	//devices.vacMotor2Control(0.0);
         	
             //myRobot.SetSafetyEnabled(false);
         	
@@ -209,14 +250,14 @@ public:
 			devices.resetGyro();
 			
 			// sync ultrasonics
-			devices.setUltrasonicDiode(1);
-			Wait(0.00005);
-			devices.setUltrasonicDiode(0);
+			//devices.setUltrasonicDiode(1);
+			//Wait(0.00005);
+			//devices.setUltrasonicDiode(0);
 			
 			// Timer setup
         	//Timer(t1);
-        	t1.Reset();
-        	t1.Start();
+        	t1->Reset();
+        	t1->Start();
         	prevTime = -1.0;
         	
         	// clear vac status
@@ -232,8 +273,8 @@ public:
             	//----------------------------------------------------------------
             	
             	//set initial prevTime unless currTime is set
-            	prevTime = (prevTime < 0) ? t1.Get() : currTime;
-            	currTime = t1.Get();
+            	prevTime = (prevTime < 0) ? t1->Get() : currTime;
+            	currTime = t1->Get();
             	deltaT = currTime - prevTime;
             	
             	
@@ -291,7 +332,7 @@ public:
             	SmartDashboard::PutNumber("Gyro", devices.getSensorSignal("gyro"));
             	SmartDashboard::PutNumber("Ultrasonic Left", devices.getSensorSignal("ultrasonic left"));
             	SmartDashboard::PutNumber("Angle to Wall", devices.angleToWall());
-            	SmartDashboard::PutBoolean("Camera Target Status", netMan.getGoalIsHot() == 1);
+            	//SmartDashboard::PutBoolean("Camera Target Status", netMan.getGoalIsHot() == 1);
             	
             	// Correct Arm Position Indicator
             	if (4.0 <= devices.getSensorSignal("armPotHieght") && devices.getSensorSignal("armPotHieght") <= 4.2)	
@@ -384,8 +425,10 @@ public:
                 //----------MANAGE VACUUM SHOOTING--------------------------------
                 if (inpMan.getJoystickButton(2, 5))
                 {
-                	devices.vacMotor1Control(0.9);
-                	devices.vacMotor2Control(0.9); //0.9 is good
+                	vacMotor1->Set(0.9);
+                	vacMotor2->Set(0.9);
+                	//devices.vacMotor1Control(0.9);
+                	//devices.vacMotor2Control(0.9); //0.9 is good
                 	guiMan.print(1, "Vacuum ON");
                 	vacStatus = true;
                 	vacSpeed = false;
@@ -393,8 +436,10 @@ public:
                 
                 if (inpMan.getJoystickButton(2, 6))
                 {
-                	devices.vacMotor1Control(0.0);
-                	devices.vacMotor2Control(0.0);
+                	vacMotor1->Set(0.0);
+                	vacMotor2->Set(0.0);
+                	//devices.vacMotor1Control(0.0);
+                	//devices.vacMotor2Control(0.0);
                 	guiMan.print(1, "Vacuum OFF");
                 	vacStatus = false;
                 	vacSpeed = false;
@@ -405,22 +450,32 @@ public:
                 {                	
                 	guiMan.print(2, "Solenoid FIRED");
                 	vacMan.shoot(0.2); //0.5*inpMan.getJoystickAxis(2, 4) + 0.5);
+                	vacMotor1->Set(0.0);
+                	vacMotor2->Set(0.0);
+                	
+                	Wait(1.5); //1.0
+                	        						
+                	devices.setSolenoid(1, false);
+                	devices.setSolenoid(2, true);
+                	
                 	guiMan.print(2, "Solenoid RESET");
                 	vacStatus = false;
                 	vacSpeed = false;
                 }
                 
                 // Indicate when the vacuum is up to speed after being activated
-                if (vacStatus && devices.getCANJagCurrent(2) >= 19.0)
+                if (vacStatus && vacMotor1->GetOutputCurrent() >= 19.0)
                 {
                 	vacSpeed = true;
                 }
                 
                 // Once vacuum at speed and active then check that it's pulled suction
-                if (vacStatus && vacSpeed && devices.getCANJagCurrent(2) <= 15.0)
+                if (vacStatus && vacSpeed && vacMotor1->GetOutputCurrent() <= 15.0)
                 {
-                	devices.vacMotor1Control(1.0);
-                	devices.vacMotor2Control(1.0);
+                	vacMotor1->Set(1.0);
+                	vacMotor2->Set(1.0);
+                	//devices.vacMotor1Control(1.0);
+                	//devices.vacMotor2Control(1.0);
                 }
                 
                 if (inpMan.getJoystickButton(1, 2))
@@ -472,13 +527,15 @@ public:
                 // GUI Manager print statements
                 guiMan.print(3, "Arm Pot = %f", devices.getSensorSignal("armPotHieght"));
                 guiMan.print(4, "Distance(ft) = %f", devices.getSensorSignal("ultrasonic right"));
+                guiMan.print(5, "Joystick 2 = %f", inpMan.getJoystickAxis(2,2));
                 
                 //-----------------UPDATES THE LCD----------------------------
                 // Update Driver Station LCD Display
                 guiMan.update();                
                 Wait(0.01); // wait for a motor update time
-                SmartDashboard::PutNumber("Update rate (s)", t1.Get()-prevTime);
+                SmartDashboard::PutNumber("Update rate (s)", t1->Get()-prevTime);
                 SmartDashboard::PutNumber("deltaT (s)", deltaT);
+                
                         
                }
             

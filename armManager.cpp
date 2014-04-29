@@ -1,6 +1,6 @@
 #include "armManager.hpp"
-#define MAX_HEIGHT 4.4
-#define MIN_HEIGHT 2.15
+#define MAX_HEIGHT 4.25
+#define MIN_HEIGHT 2.2
 
 FRC::armManager::armManager( FRC::deviceManager * devMan)
 {

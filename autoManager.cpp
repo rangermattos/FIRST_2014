@@ -5,10 +5,10 @@ FRC::autoManager::autoManager( FRC::deviceManager * devMan, FRC::armManager * ar
 	devices = devMan;
 	arm = armMan;
 	isGoodPosition = isGoodAngle = false;
-	pGainPos = 0.5; // was 1.0
+	pGainPos = 0.3; // was 0.5
 	iGainPos = 0.1 * pGainPos;
-	pGainAngle = 1.8; 
-	iGainAngle = 0.4; // change value at some point
+	pGainAngle = 0.9; 
+	iGainAngle = 0.2; // was p = 1.8 i = 0.4
 	pGainDriveAngle = 0.04;
 	iGainDriveAngle = 0.01;
 }
@@ -20,10 +20,10 @@ void FRC::autoManager::correctPosition( float desiredPos, float posThresh, doubl
 	positionBottomThreshold = desiredPos - posThresh;
 	position = devices->getSensorSignal("ultrasonic right"); // Distance sensor converted to inches
 
-	if(position > positionTopThreshold || position < positionBottomThreshold) // over or under threshold
+	if(position > positionTopThreshold) // || position < positionBottomThreshold) // over or under threshold
 	{
 		// Movement with Gyro
-		prevGyro = currGyro || devices->getSensorSignal("gyro");
+		prevGyro = 0.0; //currGyro || devices->getSensorSignal("gyro");
 		currGyro = devices->getSensorSignal("gyro");
 		//gyroCorrection = 2*devices->getSensorSignal("gyro")/90; //gyro correction
 		proportionalErrorPos = currGyro - prevGyro;
@@ -32,10 +32,11 @@ void FRC::autoManager::correctPosition( float desiredPos, float posThresh, doubl
 		integralErrorPos = 0.5 * deltaT * (currGyro + prevGyro);
 		
 		correctionCommandPos = (pGainPos * proportionalErrorPos + iGainPos * integralErrorPos);
-		correctionCommandPos= clamp(-1, 1, correctionCommandPos);
+		correctionCommandPos = clamp(-1, 1, correctionCommandPos);
 		
 		// print for debugging
 		//printf("correctionCommandPos: %f\n", correctionCommandPos);
+		// drive 1 speed was -0.75, drive 2 was 0.6
 		
 		if (proportionalErrorPos > 0)
 		{
